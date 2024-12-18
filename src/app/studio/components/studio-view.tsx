@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
 import { useStudio } from "@/providers/studio-provider";
+import { MicrophoneButton } from "@/components/MicrophoneButton";
 
 interface HistoryEntry {
 	html: string;
@@ -296,6 +297,11 @@ function HomeContent() {
 									mode === "query" ? generateHtml() : submitFeedback();
 								}
 							}}
+						/>
+						<MicrophoneButton
+							onTranscription={(text) =>
+								mode === "query" ? setQuery(text) : setCurrentFeedback(text)
+							}
 						/>
 						<button
 							disabled={
