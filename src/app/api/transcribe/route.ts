@@ -5,7 +5,7 @@ const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-async function transcribeAudio(audioBlob: Blob): Promise<string> {
+async function transcribeAudio(audioBlob: Blob): Promise<Groq.Audio.Transcriptions.Transcription> {
   try {
     const arrayBuffer = await audioBlob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -19,7 +19,7 @@ async function transcribeAudio(audioBlob: Blob): Promise<string> {
       language: 'en'
     });
 
-    return transcription.text;
+    return transcription;
   } catch (error) {
     console.error('Error transcribing audio:', error);
     throw error;
