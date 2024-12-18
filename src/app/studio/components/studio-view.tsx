@@ -284,7 +284,7 @@ function HomeContent() {
 									? setQuery(e.target.value)
 									: setCurrentFeedback(e.target.value)
 							}
-							className="flex-1 p-2 border rounded"
+							className="flex-1 p-2 border rounded-lg"
 							placeholder={
 								mode === "query"
 									? "Describe your app..."
@@ -319,7 +319,7 @@ function HomeContent() {
 						</button>
 						<button
 							onClick={() => setIsOverlayOpen(!isOverlayOpen)}
-							className="hidden lg:block px-4 py-2 border border-gray-300 text-gray-600 rounded hover:bg-gray-100 whitespace-nowrap"
+							className="hidden lg:block px-4 py-2 border border-gray-300 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 whitespace-nowrap"
 						>
 							Show prompt
 						</button>
