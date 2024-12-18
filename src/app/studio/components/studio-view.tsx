@@ -15,7 +15,8 @@ import { NewButton } from "./new-button";
 import { PromptInput } from "./prompt-input";
 import { OptionsButton } from "./options-button";
 import { useSearchParams } from "next/navigation";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
+
 
 export default function StudioView() {
 	return (
