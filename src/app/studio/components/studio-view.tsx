@@ -16,6 +16,7 @@ import { PromptInput } from "./prompt-input";
 import { OptionsButton } from "./options-button";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import AppLogo from "@/components/AppLogo";
 
 
 export default function StudioView() {
@@ -164,7 +165,7 @@ function HomeContent() {
 							className="w-full h-full border rounded bg-background shadow-sm"
 							style={{ minHeight: "100%", minWidth: "100%" }}
 							scrolling="no"
-							sandbox="allow-scripts"
+							sandbox="allow-scripts allow-same-origin"
 						/>
 					</div>
 				</div>
@@ -196,12 +197,7 @@ function HomeContent() {
 				<div className="w-1/2 pr-4 pb-4 border-r">
 					<div className="flex items-center justify-end text-sm text-gray-600">
 						<span>Powered by</span>
-						<img
-							src="/groq-logo.webp"
-							alt="Groq Logo"
-							width={48}
-							className="ml-2"
-						/>
+						<AppLogo className="ml-2 scale-75" />
 					</div>
 				</div>
 				{/* Right column */}

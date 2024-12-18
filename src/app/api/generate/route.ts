@@ -30,12 +30,13 @@ async function checkContentSafety(content: string): Promise<{ safe: boolean; cat
 
 export async function POST(request: Request) {
   try {
-    const { query, currentHtml, feedback } = await request.json();
+    const { query, currentHtml, feedback, theme } = await request.json();
 
     const prompt = constructPrompt({
       ...(query && { query }),
       currentHtml,
-      currentFeedback: feedback
+      currentFeedback: feedback,
+      theme
     });
 
     // Run safety check and code completion in parallel

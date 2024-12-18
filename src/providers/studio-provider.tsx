@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { providerFactory } from "./provider-factory";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
-import { useSearchParams } from "next/navigation";
 import { constructPrompt } from "@/utils/prompt";
+import { useTheme } from "next-themes";
 
 export interface HistoryEntry {
 	html: string;
@@ -30,6 +30,7 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [isApplying, setIsApplying] = useState(false);
 	const iframeRef = useRef<HTMLIFrameElement>(null);
+	const { theme } = useTheme();
 
 	const generateHtml = async () => {
 		setIsGenerating(true);
@@ -42,6 +43,7 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 				body: JSON.stringify({
 					query,
 					currentHtml,
+					theme,
 				}),
 			});
 
@@ -115,6 +117,7 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 					body: JSON.stringify({
 						currentHtml: history[historyIndex].html,
 						feedback: currentFeedback.trim(),
+						theme,
 					}),
 				});
 
@@ -183,6 +186,7 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 			query,
 			currentFeedback,
 			currentHtml,
+			theme,
 		});
 	};
 

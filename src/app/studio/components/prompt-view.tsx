@@ -44,7 +44,8 @@ export default function PromptView() {
   return (
     <div className="flex flex-col gap-6 items-center justify-center h-screen">
       <div className="flex flex-col gap-3 items-center justify-center min-w-[30%]">
-        <h1 className="text-[3em] font-montserrat mb-10">Start a mini-app</h1>
+        <h1 className="text-[3em] font-montserrat mb-2 text-center">Build a micro-app</h1>
+        <h2 className="text-[2em] font-montserrat mb-8 text-center italic text-muted-foreground">in seconds</h2>
         <form
           className="flex row gap-3 items-center justify-center w-full border-border border-solid border-2 rounded-full p-2 focus-within:border-primary"
           onSubmit={handleSubmit}

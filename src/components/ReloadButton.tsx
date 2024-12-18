@@ -10,10 +10,9 @@ interface ReloadButtonProps {
 export function ReloadButton({ iframeRef }: ReloadButtonProps) {
 	const handleReload = () => {
 		if (iframeRef.current) {
-			const doc = iframeRef.current.contentDocument;
-			if (doc) {
-				doc.location.reload();
-			}
+			const currentSrcDoc = iframeRef.current.srcdoc;
+			iframeRef.current.srcdoc = '';
+			iframeRef.current.srcdoc = currentSrcDoc;
 		}
 	};
 
