@@ -25,7 +25,7 @@ export function VersionSwitcher({
       >
         <IoChevronBackOutline size={20} />
       </button>
-      <span className="text-sm text-gray-600 min-w-[80px] text-center">
+      <span className="text-sm dark:text-gray-400 text-gray-600 min-w-[80px] text-center">
         Version {currentVersion} of {totalVersions}
       </span>
       <button
