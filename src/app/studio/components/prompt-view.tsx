@@ -62,7 +62,7 @@ export default function PromptView() {
 						autoFocus
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
-						className="w-full max-w-md border-0 md:text-lg p-3 focus:outline-none focus:border-0 focus:ring-0 focus-visible:ring-0 focus-visible:border-0"
+						className="w-full max-w-md border-0 md:text-lg p-3 bg-transparent shadow-none focus:outline-none focus:border-0 focus:ring-0 focus-visible:ring-0 focus-visible:border-0"
 						placeholder="Describe your app..."
 					/>
 					<MicrophoneButton onTranscription={handleTranscription} />
