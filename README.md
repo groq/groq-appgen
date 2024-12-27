@@ -22,12 +22,15 @@ An interactive web application that generates and modifies web applications usin
 
 Required environment variables:
 - `GROQ_API_KEY`: Your Groq API key
+- `UPSTASH_REDIS_URL`: Your Upstash Redis URL
+- `BLOCK_SECRET`: Your block secret
+- `HTML_SIGNING_SECRET`: Your HTML signing secret
 
 ## Getting Started
 
 1. Clone the repository
-2. Install dependencies: `npm install`
+2. Install dependencies: `pnpm install`
 3. Set up your environment variables
-4. Run the development server: `npm run dev`
+4. Run the development server: `pnpm run dev`
 
 The application will be available at `http://localhost:3000`.
