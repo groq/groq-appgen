@@ -55,7 +55,17 @@ export async function getFromStorageWithRegex(key: string): Promise<{value: stri
 
 export async function getGalleryKeys(): Promise<string[]> {
 	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
-	const keys = await redis.keys("gallery_*");
+	const keys: string[] = [];
+	let cursor = 0;
+	const count = 10000;
+	let batch = [];
+	do {
+		const resp = await redis.scan(cursor, "MATCH", "gallery_*", "COUNT", count);
+		batch = resp[1];
+		cursor += count;
+		keys.push(...batch);
+	} while (batch.length > 0);
+
 	return keys.sort().reverse(); // Sort in descending order to get latest first
 }
 
