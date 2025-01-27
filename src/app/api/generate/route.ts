@@ -75,7 +75,7 @@ async function tryCompletion(prompt: string, model: string) {
 		messages: [{ role: "user", content: prompt }],
 		model: model,
 		temperature: 0.1,
-		max_tokens: 2048,
+		max_tokens: 8192,
 		top_p: 1,
 		stream: false,
 		stop: null,
