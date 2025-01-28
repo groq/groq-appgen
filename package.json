@@ -16,6 +16,7 @@
     "@radix-ui/react-popover": "^1.1.4",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
+    "@supabase/supabase-js": "^2.48.1",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^10.0.0",
