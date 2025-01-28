@@ -9,6 +9,7 @@ interface GalleryItem {
 	description: string;
 	upvotes?: number; // Number of upvotes
 	createdAt: string; // ISO date string
+	signature: string;
 }
 
 function hashIP(ip: string): string {
