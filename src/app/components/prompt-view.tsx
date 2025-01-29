@@ -119,7 +119,6 @@ export default function PromptView() {
 						</div>
 						<div className="flex items-center gap-2 ml-auto">
 						<ModelSelector
-						selectedModel={selectedModel}
 						onChange={(model) => {
 							setSelectedModel(model);
 							setModel(model); // This will update both local and global states

@@ -123,7 +123,6 @@ function HomeContent() {
 						/>
 						<ModelSelector
 							options={MODEL_OPTIONS}
-							selectedModel={selectedModel}
 							onChange={setSelectedModel}
 						/>
 
@@ -145,7 +144,6 @@ function HomeContent() {
 						<PromptInput />
 						<ModelSelector
 							options={MODEL_OPTIONS}
-							selectedModel={selectedModel}
 							onChange={setSelectedModel}
 						/>
 						<OptionsButton className="hidden lg:flex" />
