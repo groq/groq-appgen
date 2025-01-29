@@ -82,11 +82,11 @@ async function tryCompletion(prompt: string, model: string) {
 	});
 }
 
-async function generateWithFallback(prompt: string) {
+async function generateWithFallback(prompt: string, model: string) {
 	try {
 		const chatCompletion = await tryCompletion(
 			prompt,
-			MAINTENANCE_USE_VANILLA_MODEL ? VANILLA_MODEL : PRIMARY_MODEL,
+			MAINTENANCE_USE_VANILLA_MODEL ? VANILLA_MODEL : model,
 		);
 		return chatCompletion;
 	} catch (error) {
@@ -131,9 +131,8 @@ export async function POST(request: Request) {
 	}
 
 	try {
-		const { query, currentHtml, feedback, theme, drawingData } =
+		const { query, currentHtml, feedback, theme, drawingData, model } =
 			await request.json();
-
 		let finalQuery = query;
 		if (drawingData) {
 			const drawingDescription = await getDrawingDescription(drawingData);
@@ -150,7 +149,7 @@ export async function POST(request: Request) {
 		// Run safety check and code completion in parallel
 		const [safetyResult, chatCompletion] = await Promise.all([
 			checkContentSafety(prompt),
-			generateWithFallback(prompt),
+			generateWithFallback(prompt, model),
 		]);
 
 		// Check safety result before proceeding
