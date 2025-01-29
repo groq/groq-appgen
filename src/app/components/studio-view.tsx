@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 import AppLogo from "@/components/AppLogo";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-
+import ModelSelector from "@/components/model-selector";
 export default function StudioView() {
 	return (
 		<Suspense>
@@ -29,6 +29,9 @@ export default function StudioView() {
 		</Suspense>
 	);
 }
+import { useState } from "react";
+
+import { MODEL_OPTIONS } from "@/data/models";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
@@ -51,7 +54,8 @@ function HomeContent() {
 		isGenerating,
 	} = useStudio();
 	const { resolvedTheme } = useTheme();
-
+		const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
+	
 	useEffect(() => {
 		const source = searchParams.get("source");
 		if (source) {
@@ -117,6 +121,11 @@ function HomeContent() {
 							onPrevious={() => navigateHistory("prev")}
 							onNext={() => navigateHistory("next")}
 						/>
+						<ModelSelector
+							options={MODEL_OPTIONS}
+							onChange={setSelectedModel}
+						/>
+
 						<OptionsButton />
 					</div>
 
@@ -133,6 +142,10 @@ function HomeContent() {
 						/>
 
 						<PromptInput />
+						<ModelSelector
+							options={MODEL_OPTIONS}
+							onChange={setSelectedModel}
+						/>
 						<OptionsButton className="hidden lg:flex" />
 					</div>
 				</div>

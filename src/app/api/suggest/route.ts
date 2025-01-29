@@ -23,7 +23,7 @@ async function generateSuggestionWithFallback(messages: any[]) {
       messages,
       model: getFallbackModel(),
       temperature: 0.7,
-      max_tokens: 200,
+      max_tokens: 2048,
       top_p: 1,
     });
   }

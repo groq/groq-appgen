@@ -1,12 +1,10 @@
 export function getFallbackModel(): string {
-	// Randomly choose between versatile models
-	return Math.random() < 0.5
-		? "llama-3.3-70b-versatile"
-		: "llama-3.1-70b-versatile";
+	// Use same model for fallback
+	return "deepseek-r1-distill-llama-70b";
 }
 
-export const PRIMARY_MODEL = "llama-3.3-70b-specdec";
-export const VANILLA_MODEL = "llama-3.3-70b-versatile";
+export const PRIMARY_MODEL = "deepseek-r1-distill-llama-70b";
+export const VANILLA_MODEL = "deepseek-r1-distill-llama-70b";
 
 export const PRIMARY_VISION_MODEL = "llama-3.2-90b-vision-preview";
 export const FALLBACK_VISION_MODEL = "llama-3.2-11b-vision-preview";
