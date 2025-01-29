@@ -5,26 +5,37 @@ import { useState, useEffect, useRef } from "react";
 const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() =>
-    localStorage.getItem("selectedModel") || options[0] // Default to first option or stored value
+    typeof window !== "undefined" ? localStorage.getItem("selectedModel") || options[0] : options[0]
   );
   const dropdownRef = useRef(null);
 
-  // Handle selection
+  // Sync with localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedModel = localStorage.getItem("selectedModel");
+      if (storedModel) {
+        setSelectedModel(storedModel);
+        if (onChange) onChange(storedModel);
+      }
+    }
+  }, [onChange]);
+
   const handleSelect = (model) => {
-    setSelectedModel(model); // Update local state
-    localStorage.setItem("selectedModel", model); // Save to localStorage
-    if (onChange) onChange(model); // Notify parent (if needed)
+    setSelectedModel(model);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("selectedModel", model);
+    }
+    if (onChange) onChange(model);
     setIsOpen(false);
   };
 
-  // Handle clicks outside the dropdown
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -33,7 +44,6 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
 
   return (
     <div ref={dropdownRef} className="relative w-full md:w-auto">
-      {/* Selector Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -47,7 +57,6 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
         />
       </button>
 
-      {/* Dropdown Options */}
       {isOpen && (
         <ul className="absolute z-10 mt-2 w-full md:w-[300px] bg-black border border-gray-700 rounded-lg shadow-lg">
           {options.map((option) => (
