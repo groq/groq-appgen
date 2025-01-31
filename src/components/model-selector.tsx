@@ -44,31 +44,30 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
 
   return (
     <div ref={dropdownRef} className="relative w-full md:w-auto">
-      <button
-        type="button"
+      <div
         onClick={() => setIsOpen(!isOpen)}
-        className="flex justify-between items-center w-full md:w-[300px] px-6 py-3 bg-black text-white rounded-full border border-gray-700 hover:bg-gray-900 focus:ring-2 focus:ring-gray-600 transition-all min-w-[150px]"
+        className="flex items-center justify-end gap-2 cursor-pointer bg-transparent hover:bg-accent hover:text-accent-foreground
+rounded-lg p-2 transition-colors"
       >
-        <span className="truncate">{selectedModel}</span>
+        <span className="text-black dark:text-white text-right">{selectedModel}</span>
         <ChevronDown
-          className={`w-5 h-5 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""} text-black dark:text-white`}
         />
-      </button>
+      </div>
 
       {isOpen && (
-        <ul className="absolute z-10 mt-2 w-full md:w-[300px] bg-black border border-gray-700 rounded-lg shadow-lg">
+        <ul className="absolute z-50 mt-2 w-full md:w-[300px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
           {options.map((option) => (
             <li
               key={option}
               onClick={() => handleSelect(option)}
-              className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-gray-800 transition-colors gap-4 ${
-                selectedModel === option ? "bg-gray-800 text-blue-400" : "text-white"
+              className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-accent hover:text-accent-foreground
+ transition-colors gap-4 ${
+                selectedModel === option ? "bg-transparent text-blue-600 dark:text-blue-400" : "text-black dark:text-white"
               }`}
             >
               <span>{option}</span>
-              {selectedModel === option && <Check className="w-4 h-4 text-blue-400" />}
+              {selectedModel === option && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
             </li>
           ))}
         </ul>
