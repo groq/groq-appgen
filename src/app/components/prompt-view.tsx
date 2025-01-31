@@ -10,7 +10,7 @@ import { Info, Pencil } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ModelSelector from "@/components/model-selector";
-
+import Groq_bolt from "public/groq_bolt.svg"
 import { GalleryListing } from "./gallery-listing";
 import { MAINTENANCE_GENERATION } from "@/lib/settings";
 import { MODEL_OPTIONS } from "@/data/models";
@@ -63,14 +63,15 @@ export default function PromptView() {
 
 	return (
 		<div className="flex flex-col gap-6 items-center justify-center">
-			<AppLogo className="mt-10" size={120} />
-			<div className="flex flex-col gap-3 items-center justify-center min-w-[50%] px-4 md:px-0 mt-20">
+			<AppLogo className="self-start mt-10 ml-10" size={120} />
+			<div className="flex flex-col gap-3 items-center justify-center min-w-[50%] px-4 md:px-0 mt-10">
 			<div>
 					<h1 className="text-[2em] md:text-[3em] font-montserrat text-center">
 						Build a micro-app
 					</h1>
-					<h2 className="text-[1.2em] md:text-[1.4em] font-montserrat mb-4 md:mb-8 text-center text-muted-foreground">
-						at Groq speed
+					<h2 className="text-[1.2em] md:text-[1.4em] font-montserrat mb-4 md:mb-8 text-center text-muted-foreground flex items-center justify-center gap-2">
+					at Groq speed
+						<img src="/Groq_Bolt.svg" alt="Groq Logo" className="w-8 h-8" />
 					</h2>
 				</div>
 				{MAINTENANCE_GENERATION && (
@@ -80,11 +81,10 @@ export default function PromptView() {
 					</div>
 				)}
 				<form
-					className="flex flex-col relative border-2 border-border border-solid rounded-lg p-4 w-full max-w-2xl focus-within:border-groq"
+					className="flex flex-col relative border-2 border-border border-solid rounded-lg p-4 w-full max-w-2xl focus-within:border-groq dark:border-[#666666]"
 					onSubmit={handleSubmit}
 				>
 					<textarea
-						autoFocus
 						disabled={MAINTENANCE_GENERATION}
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
