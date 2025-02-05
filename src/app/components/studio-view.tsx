@@ -130,11 +130,12 @@ function HomeContent() {
 							<div className="w-full">
 								<PromptInput />
 							</div>
-							<ModelSelector
-								options={MODEL_OPTIONS}
-								onChange={setSelectedModel}
-								className="w-full"
-							/>
+							<div className="w-full">
+								<ModelSelector
+									options={MODEL_OPTIONS}
+									onChange={setSelectedModel}
+								/>
+							</div>
 						</div>
 					</div>
 
