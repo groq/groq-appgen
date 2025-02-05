@@ -31,7 +31,7 @@ export default function StudioView() {
 }
 import { useState } from "react";
 
-import { MODEL_OPTIONS } from "@/data/models";
+import { MODEL_OPTIONS } from "@/utils/models";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
