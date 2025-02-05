@@ -127,7 +127,9 @@ function HomeContent() {
 						</div>
 						{/* Bottom Row - Input and Model */}
 						<div className="flex flex-col gap-2">
-							<PromptInput className="w-full" />
+							<div className="w-full">
+								<PromptInput />
+							</div>
 							<ModelSelector
 								options={MODEL_OPTIONS}
 								onChange={setSelectedModel}
@@ -145,7 +147,9 @@ function HomeContent() {
 							onPrevious={() => navigateHistory("prev")}
 							onNext={() => navigateHistory("next")}
 						/>
-						<PromptInput />
+						<div className="flex-1">
+							<PromptInput />
+						</div>
 						<ModelSelector
 							options={MODEL_OPTIONS}
 							onChange={setSelectedModel}
