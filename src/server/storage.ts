@@ -139,6 +139,7 @@ export async function isIPBlocked(ip: string): Promise<boolean> {
 
 	if (error) throw error;
 	return (count || 0) > 0;
+
 }
 
 // Helper function to get gallery item by session and version
@@ -358,6 +359,7 @@ export async function upvoteGalleryItem(
 	voterIp: string,
 	timestamp: string
 ): Promise<number> {
+
 	// First get the gallery item ID
 	const { data: item, error: itemError } = await supabase
 		.from('gallery_items')
@@ -379,11 +381,13 @@ export async function upvoteGalleryItem(
 	if (voteCheckError) throw voteCheckError;
 	if (existingVote) throw new Error("Already voted");
 
+
 	// Add the upvote with timestamp
 	const { error: upvoteError } = await supabase
 		.from('upvotes')
 		.insert({
 			gallery_item_id: item.id,
+
 			ip_address: voterIp,
 			created_at: timestamp
 		});

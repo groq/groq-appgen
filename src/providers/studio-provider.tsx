@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { constructPrompt } from "@/utils/prompt";
 import { useTheme } from "next-themes";
 import { EASTER_EGGS } from "@/data/easter-eggs";
-
+import { MODEL_OPTIONS } from "@/utils/models";
 export interface HistoryEntry {
 	html: string;
 	feedback: string;
@@ -36,6 +36,7 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 	const { resolvedTheme } = useTheme();
 	const [feedbackHistory, setFeedbackHistory] = useState<string[]>([]);
 	const [feedbackHistoryIndex, setFeedbackHistoryIndex] = useState(-1);
+	const [model, setModel] = useState(MODEL_OPTIONS[0])
 
 	const generateHtml = useCallback(async () => {
 		setIsGenerating(true);
@@ -59,13 +60,15 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 						query: currentQuery,
 						currentHtml,
 						drawingData,
-						theme: resolvedTheme
+						theme: resolvedTheme,
+						model: model
+
 					},
 					sessionId,
 					version: history.length > 0 ? String(history.length + 1) : "1",
 				}),
 			});
-
+			console.error("Error generating HTML: ",response)
 			if (!response.ok) {
 				throw new Error("Failed to generate HTML");
 			}
@@ -245,6 +248,8 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 		setFeedbackHistory,
 		feedbackHistoryIndex,
 		setFeedbackHistoryIndex,
+		model,
+		setModel
 	};
 });
 

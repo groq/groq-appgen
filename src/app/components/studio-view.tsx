@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 import AppLogo from "@/components/AppLogo";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-
+import ModelSelector from "@/components/model-selector";
 export default function StudioView() {
 	return (
 		<Suspense>
@@ -29,6 +29,9 @@ export default function StudioView() {
 		</Suspense>
 	);
 }
+import { useState } from "react";
+
+import { MODEL_OPTIONS } from "@/utils/models";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
@@ -51,7 +54,8 @@ function HomeContent() {
 		isGenerating,
 	} = useStudio();
 	const { resolvedTheme } = useTheme();
-
+		const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
+	
 	useEffect(() => {
 		const source = searchParams.get("source");
 		if (source) {
@@ -107,33 +111,51 @@ function HomeContent() {
 			{/* Top Input Bar */}
 			<div className="p-4 bg-background border-b flex-shrink-0">
 				<div className="flex flex-col gap-4">
-					{/* Version Switcher - Separate row on mobile */}
-					<div className="flex justify-center lg:hidden">
-						<NewButton />
-						<VersionSwitcher
-							className="lg:hidden justify-center flex-1"
-							currentVersion={historyIndex + 1}
-							totalVersions={history.length}
-							onPrevious={() => navigateHistory("prev")}
-							onNext={() => navigateHistory("next")}
-						/>
-						<OptionsButton />
+					{/* Mobile Layout */}
+					<div className="flex flex-col gap-2 lg:hidden">
+						{/* Top Row - Controls */}
+						<div className="flex items-center justify-between gap-2">
+							<NewButton />
+							<VersionSwitcher
+								className="justify-center flex-1"
+								currentVersion={historyIndex + 1}
+								totalVersions={history.length}
+								onPrevious={() => navigateHistory("prev")}
+								onNext={() => navigateHistory("next")}
+							/>
+							<OptionsButton />
+						</div>
+						{/* Bottom Row - Input and Model */}
+						<div className="flex flex-col gap-2">
+							<div className="w-full">
+								<PromptInput />
+							</div>
+							<div className="w-full">
+								<ModelSelector
+									options={MODEL_OPTIONS}
+									onChange={setSelectedModel}
+								/>
+							</div>
+						</div>
 					</div>
 
-					{/* Main Input Row */}
-					<div className="flex items-center gap-4">
-						<NewButton className="hidden lg:flex" />
-						{/* Version Switcher - Only visible on desktop */}
+					{/* Desktop Layout */}
+					<div className="hidden lg:flex items-center gap-4">
+						<NewButton />
 						<VersionSwitcher
-							className="lg:flex hidden"
 							currentVersion={historyIndex + 1}
 							totalVersions={history.length}
 							onPrevious={() => navigateHistory("prev")}
 							onNext={() => navigateHistory("next")}
 						/>
-
-						<PromptInput />
-						<OptionsButton className="hidden lg:flex" />
+						<div className="flex-1">
+							<PromptInput />
+						</div>
+						<ModelSelector
+							options={MODEL_OPTIONS}
+							onChange={setSelectedModel}
+						/>
+						<OptionsButton />
 					</div>
 				</div>
 			</div>

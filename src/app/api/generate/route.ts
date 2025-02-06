@@ -8,7 +8,8 @@ import {
 	PRIMARY_VISION_MODEL,
 	FALLBACK_VISION_MODEL,
 	getFallbackModel,
-} from "@/utils/model-selection";
+	getModelTemperature
+} from "@/utils/models";
 import {
 	MAINTENANCE_GENERATION,
 	MAINTENANCE_USE_VANILLA_MODEL,
@@ -62,7 +63,7 @@ async function tryVisionCompletion(imageData: string, model: string) {
 			},
 		],
 		model: model,
-		temperature: 0.7,
+		temperature: getModelTemperature(model),
 		max_tokens: 1024,
 		top_p: 1,
 		stream: false,
@@ -74,7 +75,7 @@ async function tryCompletion(prompt: string, model: string) {
 	return await client.chat.completions.create({
 		messages: [{ role: "user", content: prompt }],
 		model: model,
-		temperature: 0.1,
+		temperature: getModelTemperature(model),
 		max_tokens: 8192,
 		top_p: 1,
 		stream: false,
@@ -82,11 +83,11 @@ async function tryCompletion(prompt: string, model: string) {
 	});
 }
 
-async function generateWithFallback(prompt: string) {
+async function generateWithFallback(prompt: string, model: string) {
 	try {
 		const chatCompletion = await tryCompletion(
 			prompt,
-			MAINTENANCE_USE_VANILLA_MODEL ? VANILLA_MODEL : PRIMARY_MODEL,
+			MAINTENANCE_USE_VANILLA_MODEL ? VANILLA_MODEL : model,
 		);
 		return chatCompletion;
 	} catch (error) {
@@ -131,9 +132,8 @@ export async function POST(request: Request) {
 	}
 
 	try {
-		const { query, currentHtml, feedback, theme, drawingData } =
+		const { query, currentHtml, feedback, theme, drawingData, model } =
 			await request.json();
-
 		let finalQuery = query;
 		if (drawingData) {
 			const drawingDescription = await getDrawingDescription(drawingData);
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
 		// Run safety check and code completion in parallel
 		const [safetyResult, chatCompletion] = await Promise.all([
 			checkContentSafety(prompt),
-			generateWithFallback(prompt),
+			generateWithFallback(prompt, model),
 		]);
 
 		// Check safety result before proceeding
