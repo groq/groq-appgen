@@ -14,9 +14,10 @@ export function OptionsButton({ className }: { className?: string }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" size="icon" className={cn(className)}>
-					<Ellipsis size={16} />
-				</Button>
+				{/* Mobile view - just the icon */}
+				<button className={cn("lg:hidden text-foreground px-2", className)}>
+					<Ellipsis size={20} />
+				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
 				<DropdownMenuItem onClick={() => setIsOverlayOpen(!isOverlayOpen)}>
