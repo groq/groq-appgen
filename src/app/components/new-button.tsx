@@ -17,23 +17,37 @@ export function NewButton({ className }: { className?: string }) {
 		setCurrentFeedback,
 	} = useStudio();
 	const router = useRouter();
+
+	const handleClick = () => {
+		setStudioMode(false);
+		setQuery("");
+		setHistory([]);
+		setHistoryIndex(-1);
+		setCurrentHtml("");
+		setSessionId(uuidv4());
+		setMode("query");
+		setCurrentFeedback("");
+		router.push("/");
+	};
+
 	return (
-		<Button
-			className={cn("flex items-center gap-2", className)}
-			onClick={() => {
-				setStudioMode(false);
-				setQuery("");
-				setHistory([]);
-				setHistoryIndex(-1);
-				setCurrentHtml("");
-				setSessionId(uuidv4());
-				setMode("query");
-				setCurrentFeedback("");
-				router.push("/");
-			}}
-		>
-			<Plus size={16} />
-			<span className="hidden lg:flex">New</span>
-		</Button>
+		<>
+			{/* Mobile view - just the icon */}
+			<button
+				onClick={handleClick}
+				className={cn("lg:hidden text-foreground px-2", className)}
+			>
+				<Plus size={20} />
+			</button>
+
+			{/* Desktop view - full button */}
+			<Button
+				className={cn("hidden lg:flex items-center gap-2", className)}
+				onClick={handleClick}
+			>
+				<Plus size={16} />
+				<span>New</span>
+			</Button>
+		</>
 	);
 }

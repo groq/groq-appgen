@@ -79,7 +79,9 @@ export function PromptInput() {
 				}}
 			/>
 			<MicrophoneButton onTranscription={handleTranscription} />
-			<SubmitButton />
+			<div className="flex-shrink-0">
+				<SubmitButton />
+			</div>
 		</div>
 	);
 }
