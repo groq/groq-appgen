@@ -31,7 +31,7 @@ export default function StudioView() {
 }
 import { useState } from "react";
 
-import { MODEL_OPTIONS } from "@/data/models";
+import { MODEL_OPTIONS } from "@/utils/models";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
@@ -112,6 +112,7 @@ function HomeContent() {
 			<div className="p-4 bg-background lg:border-b flex-shrink-0">
 				<div className="flex flex-col gap-4">
 					{/* Mobile Layout */}
+
 					<div className="flex flex-col gap-4 lg:hidden">
 						{/* Top Row - Controls */}
 						<div className="flex items-center justify-between gap-2 mb-1">

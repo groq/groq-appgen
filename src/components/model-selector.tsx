@@ -1,5 +1,5 @@
 import { ChevronDown, Check } from "lucide-react";
-import { MODEL_OPTIONS } from "@/data/models";
+import { MODEL_OPTIONS } from "@/utils/models";
 import { useState, useEffect, useRef } from "react";
 
 const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {

@@ -14,6 +14,7 @@ export function UpvoteButton({
 }) {
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
     const fetchUpvotes = async () => {
@@ -38,6 +39,11 @@ export function UpvoteButton({
   }, [sessionId, version]);
 
   const handleUpvote = async () => {
+    if (hasVoted) {
+      toast.error("You've already voted for this app!");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch(`/api/apps/${sessionId}/${version}/upvote`, {
@@ -46,11 +52,16 @@ export function UpvoteButton({
       
       if (!response.ok) {
         const data = await response.json();
+        if (data.error === "Already voted") {
+          setHasVoted(true);
+          throw new Error("You've already voted for this app!");
+        }
         throw new Error(data.error || "Failed to upvote");
       }
       
       const data = await response.json();
       setUpvotes(data.upvotes);
+      setHasVoted(true);
       toast.success("Thanks for your vote!", {
         duration: 3000,
       });
@@ -64,21 +75,19 @@ export function UpvoteButton({
   };
 
   return (
-    <>
-      <Button
-        variant="outline"
-        className="flex gap-2 px-3"
-        onClick={handleUpvote}
-        disabled={isLoading}
-      >
-        {upvotes === -1 ? (
-          <span className="animate-pulse">Loading...</span>
-        ) : (
-          <>
-            <ThumbsUp /> {upvotes}
-          </>
-        )}
-      </Button>
-    </>
+    <Button
+      variant="outline"
+      className="flex gap-2 px-3"
+      onClick={handleUpvote}
+      disabled={isLoading || hasVoted}
+    >
+      {upvotes === -1 ? (
+        <span className="animate-pulse">Loading...</span>
+      ) : (
+        <>
+          <ThumbsUp className={hasVoted ? "text-blue-500" : ""} /> {upvotes}
+        </>
+      )}
+    </Button>
   );
 }

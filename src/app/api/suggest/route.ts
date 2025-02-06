@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import Groq from 'groq-sdk';
-import { PRIMARY_MODEL, getFallbackModel } from '@/utils/model-selection';
+import { PRIMARY_MODEL, getFallbackModel, getModelTemperature } from '@/utils/models';
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -12,7 +12,7 @@ async function generateSuggestionWithFallback(messages: any[]) {
     return await client.chat.completions.create({
       messages,
       model: PRIMARY_MODEL,
-      temperature: 0.7,
+      temperature: getModelTemperature(PRIMARY_MODEL),
       max_tokens: 200,
       top_p: 1,
     });
@@ -22,7 +22,7 @@ async function generateSuggestionWithFallback(messages: any[]) {
     return await client.chat.completions.create({
       messages,
       model: getFallbackModel(),
-      temperature: 0.7,
+      temperature: getModelTemperature(getFallbackModel()),
       max_tokens: 2048,
       top_p: 1,
     });
