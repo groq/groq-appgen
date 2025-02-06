@@ -12,9 +12,10 @@ export async function GET(request: NextRequest) {
 		
 		let sortedGallery = gallery.map(item => ({
 			...item,
-			upvoteCount: item.upvotes?.length || 0,
+			upvoteCount: Array.isArray(item.upvotes) ? item.upvotes.length : 0,
 			upvotes: undefined // Remove IP addresses from response
 		}));
+		
 
 		switch (view) {
 			case "trending":

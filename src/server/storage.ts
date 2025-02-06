@@ -1,24 +1,160 @@
 import { Redis } from "ioredis";
 import crypto from "crypto";
+import { createClient } from '@supabase/supabase-js';
 
 interface GalleryItem {
 	sessionId: string;
 	version: string;
 	title: string;
 	description: string;
-	upvotes?: string[]; // Array of IP addresses that have upvoted
+	upvotes?: number; // Number of upvotes
 	createdAt: string; // ISO date string
+	signature: string;
 }
 
 function hashIP(ip: string): string {
 	return crypto.createHash('sha256').update(ip).digest('hex').substring(0, 8);
 }
 
-export async function isIPBlocked(ip: string): Promise<boolean> {
-	const blockedIPs = await getBlockedIPs();
-	return blockedIPs.includes(ip);
+const supabase = createClient(
+	process.env.SUPABASE_URL!,
+	process.env.SUPABASE_KEY!
+);
+
+// Cache for gallery items
+interface GalleryCache {
+	items: GalleryItem[];
+	lastFetch: number;
 }
 
+let galleryCache: GalleryCache | null = null;
+
+export async function getGallery(): Promise<GalleryItem[]> {
+	const now = Date.now();
+	const CACHE_TTL = 30 * 1000;
+
+	if (galleryCache && (now - galleryCache.lastFetch) < CACHE_TTL) {
+		return galleryCache.items;
+	}
+
+	// Get all gallery items with pagination
+	let allItems = [];
+	let page = 0;
+	const PAGE_SIZE = 1000;
+	
+	while (true) {
+		const { data: items, error } = await supabase
+			.from('gallery_items')
+			.select(`
+				id,
+				session_id,
+				version,
+				title,
+				description,
+				signature,
+				created_at
+			`)
+			.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+			.order('created_at', { ascending: false });
+
+		if (error) throw error;
+		if (!items || items.length === 0) break;
+		
+		allItems.push(...items);
+		if (items.length < PAGE_SIZE) break;
+		page++;
+	}
+
+	// Get all upvotes with pagination
+	let allUpvotes = [];
+	page = 0;
+	
+	while (true) {
+		const { data: upvotes, error: upvoteError } = await supabase
+			.from('upvotes')
+			.select('gallery_item_id')
+			.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+		if (upvoteError) throw upvoteError;
+		if (!upvotes || upvotes.length === 0) break;
+		
+		allUpvotes.push(...upvotes);
+		if (upvotes.length < PAGE_SIZE) break;
+		page++;
+	}
+
+	// Count upvotes per gallery item
+	const upvoteCounts = new Map();
+	allUpvotes.forEach(vote => {
+		const count = upvoteCounts.get(vote.gallery_item_id) || 0;
+		upvoteCounts.set(vote.gallery_item_id, count + 1);
+	});
+
+	// Transform to GalleryItem format
+	const galleryItems: GalleryItem[] = allItems.map(item => ({
+		sessionId: item.session_id,
+		version: item.version,
+		title: item.title,
+		description: item.description,
+		signature: item.signature,
+		createdAt: item.created_at,
+		upvotes: upvoteCounts.get(item.id) || 0
+	}));
+
+	galleryCache = {
+		items: galleryItems,
+		lastFetch: now
+	};
+
+	return galleryItems;
+}
+
+export async function getUpvotes(sessionId: string, version: string): Promise<number> {
+	// First get the gallery item ID
+	const { data: item, error: itemError } = await supabase
+		.from('gallery_items')
+		.select('id')
+		.eq('session_id', sessionId)
+		.eq('version', version)
+		.single();
+
+	if (itemError) throw itemError;
+	if (!item) throw new Error("Gallery item not found");
+
+	// Then count upvotes for this item
+	const { count, error: countError } = await supabase
+		.from('upvotes')
+		.select('*', { count: 'exact', head: true })
+		.eq('gallery_item_id', item.id);
+
+	if (countError) throw countError;
+	return count || 0;
+}
+
+export async function isIPBlocked(ip: string): Promise<boolean> {
+	const { count, error } = await supabase
+		.from('blocked_ips')
+		.select('*', { count: 'exact', head: true })
+		.eq('ip_address', ip);
+
+	if (error) throw error;
+	return (count || 0) > 0;
+}
+
+// Helper function to get gallery item by session and version
+export async function getGalleryItem(sessionId: string, version: string) {
+	const { data, error } = await supabase
+		.from('gallery_items')
+		.select('id, session_id, version, title, description, signature, created_at, creator_ip_hash')
+		.eq('session_id', sessionId)
+		.eq('version', version)
+		.single();
+
+	if (error) throw error;
+	return data;
+}
+
+// Legacy Redis function - no longer used
 export function getStorageKey(sessionId: string, version: string, ip?: string): string {
 	if (!ip) {
 		return `${sessionId}/${version}/*`;
@@ -27,22 +163,26 @@ export function getStorageKey(sessionId: string, version: string, ip?: string): 
 	return `${sessionId}/${version}/${ipHash}`;
 }
 
+// Legacy Redis function - no longer used
 function getGalleryKey(timestamp: number, randomHash: string, ip: string): string {
 	const ipHash = hashIP(ip);
 	return `gallery_${timestamp}_${randomHash}_${ipHash}`;
 }
 
+// Legacy Redis function - no longer used
 export async function saveToStorage(key: string, value: string) {
 	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
 	await redis.set(key, value);
 }
 
+// Legacy Redis function - no longer used
 export async function getFromStorage(key: string) {
 	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
 	const value = await redis.get(key);
 	return value;
 }
 
+// Legacy Redis function - no longer used
 export async function getFromStorageWithRegex(key: string): Promise<{value: string, key: string}> {
 	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
 	const keys = await redis.keys(key);
@@ -53,6 +193,7 @@ export async function getFromStorageWithRegex(key: string): Promise<{value: stri
 	return {value: await getFromStorage(keys[0]), key: keys[0]};
 }
 
+// Legacy Redis function - no longer used
 export async function getGalleryKeys(): Promise<string[]> {
 	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
 	const keys: string[] = [];
@@ -69,6 +210,7 @@ export async function getGalleryKeys(): Promise<string[]> {
 	return keys.sort().reverse(); // Sort in descending order to get latest first
 }
 
+// Legacy Redis function - no longer used
 export async function getBlockedIPs(): Promise<string[]> {
 	const blockedIPsStr = await getFromStorage("blocked_ips");
 	return blockedIPsStr ? JSON.parse(blockedIPsStr) : [];
@@ -79,175 +221,134 @@ export async function blockIP(ip: string, token: string) {
 		throw new Error("Invalid token");
 	}
 
-	const blockedIPs = await getBlockedIPs();
-	if (!blockedIPs.includes(ip)) {
-		blockedIPs.push(ip);
-		await saveToStorage("blocked_ips", JSON.stringify(blockedIPs));
+	// Add IP to blocked_ips table
+	const { error: blockError } = await supabase
+		.from('blocked_ips')
+		.upsert({
+			ip_address: ip
+		});
+
+	if (blockError) throw blockError;
+
+	// Get all gallery items created by this IP
+	const { data: items, error: itemsError } = await supabase
+		.from('gallery_items')
+		.select('id')
+		.eq('creator_ip_hash', hashIP(ip));
+
+	if (itemsError) throw itemsError;
+
+	if (items && items.length > 0) {
+		// Delete all gallery items by this IP (cascade will handle upvotes)
+		const { error: deleteError } = await supabase
+			.from('gallery_items')
+			.delete()
+			.eq('creator_ip_hash', hashIP(ip));
+
+		if (deleteError) throw deleteError;
 	}
 
-	const ipHash = hashIP(ip);
-	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
-	
-	// Remove gallery items with this IP hash
-	const galleryKeys = await redis.keys(`gallery_*_${ipHash}`);
-	for (const key of galleryKeys) {
-		await redis.del(key);
-	}
-
-	// Remove stored apps with this IP hash
-	const appKeys = await redis.keys(`*/${ipHash}`);
-	for (const key of appKeys) {
-		await redis.del(key);
-	}
-}
-
-// Cache for gallery items
-let galleryCache: {
-	items: GalleryItem[];
-	lastFetch: number;
-} | null = null;
-
-export async function getGallery(): Promise<GalleryItem[]> {
-	const now = Date.now();
-	const CACHE_TTL = 30 * 1000; // 30 seconds in milliseconds
-
-	// Return cached data if it's still fresh
-	if (galleryCache && (now - galleryCache.lastFetch) < CACHE_TTL) {
-		return galleryCache.items;
-	}
-
-	const keys = await getGalleryKeys();
-	if(keys.length === 0) {
-		return [];
-	}
-
-	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
-	const itemStrings = await redis.mget(...keys);
-	
-	const items = itemStrings
-		.filter((str): str is string => str !== null)
-		.map((str) => {
-			try {
-				return JSON.parse(str) as GalleryItem;
-			} catch (err) {
-				console.error("Error parsing gallery item:", err);
-				return null;
-			}
-		})
-		.filter((item): item is GalleryItem => item !== null);
-
-	// Update cache
-	galleryCache = {
-		items,
-		lastFetch: now
-	};
-
-	return items;
+	// Clear the gallery cache
+	galleryCache = null;
 }
 
 export async function addToGallery(item: GalleryItem, creatorIP: string): Promise<boolean> {
-	
-	// Initialize upvotes array and ensure createdAt is set
-	item.upvotes = [];
+	// Ensure createdAt is set
 	item.createdAt = item.createdAt || new Date().toISOString();
-	
-	// Generate unique key with timestamp and random hash
-	const timestamp = Math.floor(Date.now() / 1000);
-	const randomHash = Math.random().toString(36).substring(2, 8);
-	const key = getGalleryKey(timestamp, randomHash, creatorIP);
-	
-	await saveToStorage(key, JSON.stringify(item));
+	const creatorIpHash = hashIP(creatorIP);
+
+	// Insert into gallery_items table
+	const { data: galleryItem, error: insertError } = await supabase
+		.from('gallery_items')
+		.upsert({
+			session_id: item.sessionId,
+			version: item.version,
+			title: item.title,
+			description: item.description,
+			signature: item.signature,
+			created_at: item.createdAt,
+			creator_ip_hash: creatorIpHash
+		})
+		.select()
+		.single();
+
+	if (insertError) throw insertError;
+	if (!galleryItem) throw new Error("Failed to add gallery item");
+
+	// Clear the gallery cache to ensure fresh data on next fetch
+	galleryCache = null;
 
 	return true;
 }
 
 export async function removeGalleryItem(sessionId: string, version: string, requestIP: string): Promise<boolean> {
-	const ipHash = hashIP(requestIP);
-	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
+	const requestIpHash = hashIP(requestIP);
+
+	// Get the gallery item and verify ownership using creator_ip_hash
+	const { data: item, error: selectError } = await supabase
+		.from('gallery_items')
+		.select('id, creator_ip_hash')
+		.eq('session_id', sessionId)
+		.eq('version', version)
+		.single();
+
+	if (selectError) throw selectError;
+	if (!item) throw new Error("Gallery item not found");
 	
-	// Look for items with matching sessionId/version and IP hash
-	const keys = await redis.keys(`gallery_*_${ipHash}`);
-	if(keys.length === 0) {
+	// Check if the requesting IP hash matches the creator IP hash
+	if (item.creator_ip_hash !== requestIpHash) {
 		throw new Error("Unauthorized: You can only remove your own submissions");
 	}
+
+	// Delete the gallery item (cascade will handle upvotes)
+	const { error: deleteError } = await supabase
+		.from('gallery_items')
+		.delete()
+		.eq('id', item.id);
+
+	if (deleteError) throw deleteError;
 	
-	const itemStrings = await redis.mget(...keys);
-	for (let i = 0; i < keys.length; i++) {
-		const itemStr = itemStrings[i];
-		if (itemStr) {
-			try {
-				const item = JSON.parse(itemStr);
-				if (item.sessionId === sessionId && item.version === version) {
-					await redis.del(keys[i]);
-					return true;
-				}
-			} catch (err) {
-				console.error("Error parsing gallery item:", err);
-			}
-		}
-	}
+	// Clear the gallery cache
+	galleryCache = null;
 	
-	throw new Error("Unauthorized: You can only remove your own submissions");
+	return true;
 }
 
 export async function upvoteGalleryItem(sessionId: string, version: string, voterIp: string): Promise<number> {
-	const { value: itemStr } = await getFromStorageWithRegex(getStorageKey(sessionId, version));
-	if (!itemStr) throw new Error("App not found");
+	// First get the gallery item ID
+	const { data: item, error: itemError } = await supabase
+		.from('gallery_items')
+		.select('id')
+		.eq('session_id', sessionId)
+		.eq('version', version)
+		.single();
 
-	const item = JSON.parse(itemStr);
-	const creatorIpHash = hashIP(item.creatorIP);
+	if (itemError) throw itemError;
+	if (!item) throw new Error("Gallery item not found");
 
-	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
-	const keys = await redis.keys("gallery_*_" + creatorIpHash);
-	const galleryItems = await redis.mget(...keys);
+	// Check if this IP has already voted
+	const { count: existingVote, error: voteCheckError } = await supabase
+		.from('upvotes')
+		.select('*', { count: 'exact', head: true })
+		.eq('gallery_item_id', item.id)
+		.eq('ip_address', voterIp);
 
-	let galleryItem, galleryItemKey;
-	for (let i = 0; i < galleryItems.length; i++) {
-		const parsedItem = JSON.parse(galleryItems[i]);
-		if (parsedItem.sessionId === sessionId && parsedItem.version === version) {
-			galleryItem = parsedItem;
-			galleryItemKey = keys[i];
-			break;
-		}
-	}
+	if (voteCheckError) throw voteCheckError;
+	if (existingVote) throw new Error("Already voted");
 
-	if (!galleryItem) throw new Error("Gallery item not found");
+	// Add the upvote
+	const { error: upvoteError } = await supabase
+		.from('upvotes')
+		.insert({
+			gallery_item_id: item.id,
+			ip_address: voterIp
+		});
 
-	if (!galleryItem.upvotes) {
-		galleryItem.upvotes = [];
-	}
+	if (upvoteError) throw upvoteError;
 
-	if (galleryItem.upvotes.includes(voterIp)) {
-		throw new Error("Already voted");
-	}
+	// Clear the gallery cache
+	galleryCache = null;
 
-	galleryItem.upvotes.push(voterIp);
-	await saveToStorage(galleryItemKey, JSON.stringify(galleryItem));
-
-	return galleryItem.upvotes.length;
-}
-
-export async function getUpvotes(sessionId: string, version: string): Promise<number> {
-	const { value: itemStr } = await getFromStorageWithRegex(getStorageKey(sessionId, version));
-	if (!itemStr) throw new Error("App not found");
-
-	const item = JSON.parse(itemStr);
-	const creatorIpHash = hashIP(item.creatorIP);
-
-	const redis = new Redis(process.env.UPSTASH_REDIS_URL);
-	const keys = await redis.keys("gallery_*_" + creatorIpHash);
-	const galleryItems = await redis.mget(...keys);
-
-	let galleryItem;
-	for (const itemStr of galleryItems) {
-		const parsedItem = JSON.parse(itemStr);
-		if (parsedItem.sessionId === sessionId && parsedItem.version === version) {
-			galleryItem = parsedItem;
-			break;
-		}
-	}
-
-	if (!galleryItem) throw new Error("Gallery item not found");
-
-	return galleryItem.upvotes?.length || 0;
+	// Return new upvote count
+	return await getUpvotes(sessionId, version);
 }
