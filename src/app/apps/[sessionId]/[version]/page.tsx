@@ -15,6 +15,11 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 
+interface AppData {
+	html: string;
+	avoidGallery?: boolean;
+}
+
 export default function SharedApp({
 	params,
 }: {
@@ -22,6 +27,7 @@ export default function SharedApp({
 }) {
 	const [html, setHtml] = useState("");
 	const [showWarning, setShowWarning] = useState(true);
+	const [isInGallery, setIsInGallery] = useState<boolean>(true);
 
 	useEffect(() => {
 		const fetchHtml = async () => {
@@ -32,12 +38,13 @@ export default function SharedApp({
 				if (!response.ok) {
 					throw new Error("Failed to fetch HTML");
 				}
-				const htmlContent = await response.text();
-				if (htmlContent.startsWith("{")) {
-					const data = JSON.parse(htmlContent);
+				const content = await response.text();
+				if (content.startsWith("{")) {
+					const data: AppData = JSON.parse(content);
 					setHtml(data.html);
+					setIsInGallery(!data.avoidGallery);
 				} else {
-					setHtml(htmlContent);
+					setHtml(content);
 				}
 			} catch (error) {
 				console.error("Error fetching HTML:", error);
@@ -87,10 +94,12 @@ export default function SharedApp({
 							sessionId={params.sessionId}
 							version={params.version}
 						/>
-						<UpvoteButton
-							sessionId={params.sessionId}
-							version={params.version}
-						/>
+						{isInGallery && (
+							<UpvoteButton
+								sessionId={params.sessionId}
+								version={params.version}
+							/>
+						)}
 					</div>
 				</>
 			)}

@@ -7,7 +7,8 @@ export async function POST(
 ) {
   try {
     const clientIp = request.headers.get("x-forwarded-for") || request.ip || "unknown";
-    const upvoteCount = await upvoteGalleryItem(params.sessionId, params.version, clientIp);
+    const timestamp = new Date().toISOString();
+    const upvoteCount = await upvoteGalleryItem(params.sessionId, params.version, clientIp, timestamp);
     return NextResponse.json({ upvotes: upvoteCount });
   } catch (error) {
     return NextResponse.json(
