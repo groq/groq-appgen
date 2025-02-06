@@ -139,6 +139,7 @@ export async function isIPBlocked(ip: string): Promise<boolean> {
 
 	if (error) throw error;
 	return (count || 0) > 0;
+
 }
 
 // Helper function to get gallery item by session and version
@@ -282,39 +283,83 @@ export async function addToGallery(item: GalleryItem, creatorIP: string): Promis
 }
 
 export async function removeGalleryItem(sessionId: string, version: string, requestIP: string): Promise<boolean> {
-	const requestIpHash = hashIP(requestIP);
+	let redisSuccess = false;
+	let supabaseSuccess = false;
 
-	// Get the gallery item and verify ownership using creator_ip_hash
-	const { data: item, error: selectError } = await supabase
-		.from('gallery_items')
-		.select('id, creator_ip_hash')
-		.eq('session_id', sessionId)
-		.eq('version', version)
-		.single();
+	try {
+		// Try Redis removal first
+		try {
+			const key = getStorageKey(sessionId, version);
+			const { value } = await getFromStorageWithRegex(key);
+			
+			if (value) {
+				const data = JSON.parse(value);
+				if (data.creatorIP !== requestIP) {
+					throw new Error("Unauthorized: You can only remove your own submissions");
+				}
 
-	if (selectError) throw selectError;
-	if (!item) throw new Error("Gallery item not found");
-	
-	// Check if the requesting IP hash matches the creator IP hash
-	if (item.creator_ip_hash !== requestIpHash) {
-		throw new Error("Unauthorized: You can only remove your own submissions");
+				const redis = new Redis(process.env.REDIS_URL!);
+				await redis.del(key);
+				await redis.quit();
+				redisSuccess = true;
+			}
+		} catch (error) {
+			if (error instanceof Error && error.message.includes("Unauthorized")) {
+				throw error;
+			}
+			// Log but continue if Redis fails
+			console.error("Redis removal error:", error);
+		}
+
+		// Try Supabase removal
+		try {
+			const requestIpHash = hashIP(requestIP);
+
+			const { data: item, error: selectError } = await supabase
+				.from('gallery_items')
+				.select('id, creator_ip_hash')
+				.eq('session_id', sessionId)
+				.eq('version', version)
+				.single();
+
+			if (!selectError && item) {
+				if (item.creator_ip_hash !== requestIpHash) {
+					throw new Error("Unauthorized: You can only remove your own submissions");
+				}
+
+				const { error: deleteError } = await supabase
+					.from('gallery_items')
+					.delete()
+					.eq('id', item.id);
+
+				if (!deleteError) {
+					supabaseSuccess = true;
+					galleryCache = null; // Clear gallery cache on successful removal
+				}
+			}
+		} catch (error) {
+			if (error instanceof Error && error.message.includes("Unauthorized")) {
+				throw error;
+			}
+			// Log but continue if Supabase fails
+			console.error("Supabase removal error:", error);
+		}
+
+		// Return true if at least one storage removal succeeded
+		return redisSuccess || supabaseSuccess;
+	} catch (error) {
+		console.error('Error in removeGalleryItem:', error);
+		throw error;
 	}
-
-	// Delete the gallery item (cascade will handle upvotes)
-	const { error: deleteError } = await supabase
-		.from('gallery_items')
-		.delete()
-		.eq('id', item.id);
-
-	if (deleteError) throw deleteError;
-	
-	// Clear the gallery cache
-	galleryCache = null;
-	
-	return true;
 }
 
-export async function upvoteGalleryItem(sessionId: string, version: string, voterIp: string): Promise<number> {
+export async function upvoteGalleryItem(
+	sessionId: string, 
+	version: string, 
+	voterIp: string,
+	timestamp: string
+): Promise<number> {
+
 	// First get the gallery item ID
 	const { data: item, error: itemError } = await supabase
 		.from('gallery_items')
@@ -336,12 +381,15 @@ export async function upvoteGalleryItem(sessionId: string, version: string, vote
 	if (voteCheckError) throw voteCheckError;
 	if (existingVote) throw new Error("Already voted");
 
-	// Add the upvote
+
+	// Add the upvote with timestamp
 	const { error: upvoteError } = await supabase
 		.from('upvotes')
 		.insert({
 			gallery_item_id: item.id,
-			ip_address: voterIp
+
+			ip_address: voterIp,
+			created_at: timestamp
 		});
 
 	if (upvoteError) throw upvoteError;

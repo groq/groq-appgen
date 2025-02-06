@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
 		
 		let sortedGallery = gallery.map(item => ({
 			...item,
-			upvoteCount: Array.isArray(item.upvotes) ? item.upvotes.length : 0,
+
+			upvoteCount: typeof item.upvotes === 'number' ? item.upvotes : 0,
 			upvotes: undefined // Remove IP addresses from response
 		}));
 		
