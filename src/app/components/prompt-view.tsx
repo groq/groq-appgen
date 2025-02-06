@@ -13,7 +13,7 @@ import ModelSelector from "@/components/model-selector";
 import Groq_bolt from "public/groq_bolt.svg"
 import { GalleryListing } from "./gallery-listing";
 import { MAINTENANCE_GENERATION } from "@/lib/settings";
-import { MODEL_OPTIONS } from "@/data/models";
+import { MODEL_OPTIONS } from "@/utils/models";
 const APP_SUGGESTIONS = APP_EXAMPLES.map((example) => example.label);
 
 

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { constructPrompt } from "@/utils/prompt";
 import { useTheme } from "next-themes";
 import { EASTER_EGGS } from "@/data/easter-eggs";
-import { MODEL_OPTIONS } from "@/data/models";
+import { MODEL_OPTIONS } from "@/utils/models";
 export interface HistoryEntry {
 	html: string;
 	feedback: string;

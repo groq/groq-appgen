@@ -8,7 +8,8 @@ import {
 	PRIMARY_VISION_MODEL,
 	FALLBACK_VISION_MODEL,
 	getFallbackModel,
-} from "@/utils/model-selection";
+	getModelTemperature
+} from "@/utils/models";
 import {
 	MAINTENANCE_GENERATION,
 	MAINTENANCE_USE_VANILLA_MODEL,
@@ -62,7 +63,7 @@ async function tryVisionCompletion(imageData: string, model: string) {
 			},
 		],
 		model: model,
-		temperature: 0.7,
+		temperature: getModelTemperature(model),
 		max_tokens: 1024,
 		top_p: 1,
 		stream: false,
@@ -74,7 +75,7 @@ async function tryCompletion(prompt: string, model: string) {
 	return await client.chat.completions.create({
 		messages: [{ role: "user", content: prompt }],
 		model: model,
-		temperature: 0.1,
+		temperature: getModelTemperature(model),
 		max_tokens: 8192,
 		top_p: 1,
 		stream: false,
