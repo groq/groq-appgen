@@ -18,7 +18,12 @@ function hashIP(ip: string): string {
 
 const supabase = createClient(
 	process.env.SUPABASE_URL!,
-	process.env.SUPABASE_KEY!
+	process.env.SUPABASE_KEY!,
+	{
+		auth: {
+			persistSession: false,
+		}
+	}
 );
 
 // Cache for gallery items
