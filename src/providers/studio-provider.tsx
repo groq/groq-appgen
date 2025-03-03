@@ -16,6 +16,7 @@ export interface HistoryEntry {
 	signature?: string;
 	sessionId?: string;
 	version?: string;
+	reasoning?: string;
 }
 
 const [StudioProvider, useStudio] = providerFactory(() => {
@@ -38,8 +39,24 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 	const [feedbackHistoryIndex, setFeedbackHistoryIndex] = useState(-1);
 	const [model, setModel] = useState(MODEL_OPTIONS[0])
 
+	// New streaming state
+	const [isStreaming, setIsStreaming] = useState(false);
+	const [streamingContent, setStreamingContent] = useState("");
+	const [streamingComplete, setStreamingComplete] = useState(false);
+
+	// Helper function to reset streaming state
+	const resetStreamingState = () => {
+		setIsStreaming(false);
+		setStreamingContent("");
+		setStreamingComplete(false);
+	};
+
 	const generateHtml = useCallback(async () => {
 		setIsGenerating(true);
+		setIsStreaming(true);
+		setStreamingContent("");
+		setStreamingComplete(false);
+		
 		try {
 			let currentQuery = query;
 			const easterEgg = EASTER_EGGS.find(
@@ -61,46 +78,111 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 						currentHtml,
 						drawingData,
 						theme: resolvedTheme,
-						model: model
-
+						model: model,
+						stream: true
 					},
 					sessionId,
 					version: history.length > 0 ? String(history.length + 1) : "1",
 				}),
 			});
-			console.error("Error generating HTML: ",response)
+
 			if (!response.ok) {
 				throw new Error("Failed to generate HTML");
 			}
 
-			const result = await response.json();
-
-			const newEntry: HistoryEntry = {
-				html: result.html,
-				feedback: "",
-				usage: {
-					total_time: result.usage?.total_time || 0,
-					total_tokens: result.usage?.total_tokens || 0
-				},
-				sessionId,
-				version: String(history.length + 1),
-				signature: result.signature,
-			};
-
-			setHistory((prev) => [...prev, newEntry]);
-			setHistoryIndex((prev) => prev + 1);
-			setCurrentHtml(result.html);
-			setMode("feedback");
+			if (response.headers.get("Content-Type")?.includes("text/event-stream")) {
+				// Handle streaming response
+				const reader = response.body?.getReader();
+				const decoder = new TextDecoder();
+				
+				if (!reader) {
+					throw new Error("Failed to get reader from response");
+				}
+				
+				let reasoning = "";
+				let done = false;
+				let html = "";
+				let signature = "";
+				
+				while (!done) {
+					const { value, done: readerDone } = await reader.read();
+					done = readerDone;
+					
+					if (value) {
+						const text = decoder.decode(value);
+						const lines = text.split("\n").filter(line => line.trim());
+						
+						for (const line of lines) {
+							try {
+								const data = JSON.parse(line);
+								
+								if (data.type === "chunk") {
+									reasoning = data.reasoning;
+									setStreamingContent(reasoning);
+								} else if (data.type === "complete") {
+									html = data.html;
+									signature = data.signature;
+									setStreamingComplete(true);
+								} else if (data.type === "error") {
+									throw new Error(data.error);
+								}
+							} catch (e) {
+								console.error("Error parsing streaming response:", e);
+							}
+						}
+					}
+				}
+				
+				// Create new history entry with the final HTML
+				const newEntry: HistoryEntry = {
+					html,
+					feedback: "",
+					reasoning,
+					sessionId,
+					version: String(history.length + 1),
+					signature,
+				};
+				
+				setHistory((prev) => [...prev, newEntry]);
+				setHistoryIndex((prev) => prev + 1);
+				setCurrentHtml(html);
+				setMode("feedback");
+			} else {
+				// Handle non-streaming response (fallback)
+				const result = await response.json();
+				
+				const newEntry: HistoryEntry = {
+					html: result.html,
+					feedback: "",
+					usage: {
+						total_time: result.usage?.total_time || 0,
+						total_tokens: result.usage?.total_tokens || 0
+					},
+					sessionId,
+					version: String(history.length + 1),
+					signature: result.signature,
+				};
+				
+				setHistory((prev) => [...prev, newEntry]);
+				setHistoryIndex((prev) => prev + 1);
+				setCurrentHtml(result.html);
+				setMode("feedback");
+			}
 		} catch (error) {
 			console.error("Error generating HTML:", error);
 			toast.error("Failed to generate HTML");
 		} finally {
 			setIsGenerating(false);
+			setIsStreaming(false);
 		}
-	}, [query, currentHtml, resolvedTheme, sessionId, history, setHistory, setHistoryIndex, setCurrentHtml, setMode, setQuery, drawingData]);
+	}, [query, currentHtml, resolvedTheme, sessionId, history, setHistory, setHistoryIndex, setCurrentHtml, setMode, setQuery, drawingData, model]);
 
 	const submitFeedback = async () => {
 		setIsApplying(true);
+		setIsStreaming(true);
+		setStreamingContent("");
+		setStreamingComplete(false);
+		
 		try {
 			if (currentFeedback.trim()) {
 				// Add to feedback history, deduplicating entries
@@ -130,42 +212,108 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 						currentHtml: history[historyIndex].html,
 						feedback: currentFeedback.trim(),
 						theme: resolvedTheme,
+						stream: true,
 					}),
 				});
 
-				const data = await response.json();
-
 				if (!response.ok) {
-					if (response.status === 400 && data.category) {
-						toast.error(
-							<div>
-								<p>{data.error}</p>
-								<p className="text-sm text-gray-500 mt-1">
-									Category: {data.category}
-								</p>
-							</div>,
-							{ duration: 5000 },
-						);
-						return;
+					if (response.status === 400) {
+						const data = await response.json();
+						if (data.category) {
+							toast.error(
+								<div>
+									<p>{data.error}</p>
+									<p className="text-sm text-gray-500 mt-1">
+										Category: {data.category}
+									</p>
+								</div>,
+								{ duration: 5000 },
+							);
+							return;
+						}
 					}
 					throw new Error("Failed to generate HTML");
 				}
 
-				if (data.html) {
+				if (response.headers.get("Content-Type")?.includes("text/event-stream")) {
+					// Handle streaming response
+					const reader = response.body?.getReader();
+					const decoder = new TextDecoder();
+					
+					if (!reader) {
+						throw new Error("Failed to get reader from response");
+					}
+					
+					let reasoning = "";
+					let done = false;
+					let html = "";
+					let signature = "";
+					
+					while (!done) {
+						const { value, done: readerDone } = await reader.read();
+						done = readerDone;
+						
+						if (value) {
+							const text = decoder.decode(value);
+							const lines = text.split("\n").filter(line => line.trim());
+							
+							for (const line of lines) {
+								try {
+									const data = JSON.parse(line);
+									
+									if (data.type === "chunk") {
+										reasoning = data.reasoning;
+										setStreamingContent(reasoning);
+									} else if (data.type === "complete") {
+										html = data.html;
+										signature = data.signature;
+										setStreamingComplete(true);
+									} else if (data.type === "error") {
+										throw new Error(data.error);
+									}
+								} catch (e) {
+									console.error("Error parsing streaming response:", e);
+								}
+							}
+						}
+					}
+					
+					// Create new history entry with the final HTML
 					const version = (history.length + 1).toString();
 					const newEntry: HistoryEntry = {
-						html: data.html,
+						html,
 						feedback: "",
-						usage: data.usage,
-						signature: data.signature,
+						reasoning,
+						signature,
 						sessionId: history[historyIndex].sessionId,
 						version,
 					};
+					
 					const newHistory = [...history.slice(0, historyIndex + 1), newEntry];
 					setHistory(newHistory);
 					setHistoryIndex(newHistory.length - 1);
-					setCurrentHtml(data.html);
+					setCurrentHtml(html);
 					setCurrentFeedback("");
+				} else {
+					// Handle non-streaming response (fallback)
+					const data = await response.json();
+					
+					if (data.html) {
+						const version = (history.length + 1).toString();
+						const newEntry: HistoryEntry = {
+							html: data.html,
+							feedback: "",
+							usage: data.usage,
+							signature: data.signature,
+							sessionId: history[historyIndex].sessionId,
+							version,
+						};
+						const newHistory = [...history.slice(0, historyIndex + 1), newEntry];
+						setHistory(newHistory);
+						setHistoryIndex(newHistory.length - 1);
+						setCurrentHtml(data.html);
+						setCurrentFeedback("");
+					}
 				}
 			}
 		} catch (error) {
@@ -173,10 +321,14 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 			toast.error("Failed to apply edit");
 		} finally {
 			setIsApplying(false);
+			setIsStreaming(false);
 		}
 	};
 
 	const navigateHistory = (direction: "prev" | "next") => {
+		// Reset streaming state when navigating history
+		resetStreamingState();
+		
 		const newIndex = direction === "prev" ? historyIndex - 1 : historyIndex + 1;
 		if (newIndex >= 0 && newIndex < history.length) {
 			setHistoryIndex(newIndex);
@@ -211,6 +363,18 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 			generateHtml();
 		}
 	}, [triggerGeneration, setTriggerGeneration, generateHtml]);
+
+	// Reset streaming state when studio mode changes
+	useEffect(() => {
+		if (!studioMode) {
+			resetStreamingState();
+		}
+	}, [studioMode]);
+
+	// Reset streaming state when session ID changes (new app)
+	useEffect(() => {
+		resetStreamingState();
+	}, [sessionId]);
 
 	return {
 		query,
@@ -249,7 +413,15 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 		feedbackHistoryIndex,
 		setFeedbackHistoryIndex,
 		model,
-		setModel
+		setModel,
+		// New streaming properties
+		isStreaming,
+		setIsStreaming,
+		streamingContent,
+		setStreamingContent,
+		streamingComplete,
+		setStreamingComplete,
+		resetStreamingState,
 	};
 });
 

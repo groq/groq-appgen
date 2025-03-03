@@ -15,6 +15,7 @@ export function NewButton({ className }: { className?: string }) {
 		setSessionId,
 		setMode,
 		setCurrentFeedback,
+		resetStreamingState,
 	} = useStudio();
 	const router = useRouter();
 
@@ -27,6 +28,7 @@ export function NewButton({ className }: { className?: string }) {
 		setSessionId(uuidv4());
 		setMode("query");
 		setCurrentFeedback("");
+		resetStreamingState();
 		router.push("/");
 	};
 
