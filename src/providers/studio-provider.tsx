@@ -133,7 +133,6 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 					}
 				}
 				
-				// Create new history entry with the final HTML
 				const newEntry: HistoryEntry = {
 					html,
 					feedback: "",
@@ -148,7 +147,6 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 				setCurrentHtml(html);
 				setMode("feedback");
 			} else {
-				// Handle non-streaming response (fallback)
 				const result = await response.json();
 				
 				const newEntry: HistoryEntry = {
@@ -364,14 +362,12 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 		}
 	}, [triggerGeneration, setTriggerGeneration, generateHtml]);
 
-	// Reset streaming state when studio mode changes
 	useEffect(() => {
 		if (!studioMode) {
 			resetStreamingState();
 		}
 	}, [studioMode]);
 
-	// Reset streaming state when session ID changes (new app)
 	useEffect(() => {
 		resetStreamingState();
 	}, [sessionId]);
@@ -414,7 +410,6 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 		setFeedbackHistoryIndex,
 		model,
 		setModel,
-		// New streaming properties
 		isStreaming,
 		setIsStreaming,
 		streamingContent,
