@@ -372,6 +372,20 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 		resetStreamingState();
 	}, [sessionId]);
 
+	// Add a new effect to reset streaming state when historyIndex changes
+	useEffect(() => {
+		if (historyIndex >= 0) {
+			resetStreamingState();
+		}
+	}, [historyIndex]);
+
+	// Add a cleanup effect to reset streaming state when component unmounts
+	useEffect(() => {
+		return () => {
+			resetStreamingState();
+		};
+	}, []);
+
 	return {
 		query,
 		setQuery,

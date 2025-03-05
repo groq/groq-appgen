@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
 	vscDarkPlus,
@@ -59,10 +59,12 @@ function HomeContent() {
 	} = useStudio();
 	const { resolvedTheme } = useTheme();
 	const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
+	const sourceLoadedRef = useRef(false);
 	
 	useEffect(() => {
 		const source = searchParams.get("source");
-		if (source) {
+		if (source && !sourceLoadedRef.current) {
+			sourceLoadedRef.current = true;
 			const loadSourceVersion = async () => {
 				resetStreamingState();
 				
@@ -98,6 +100,7 @@ function HomeContent() {
 				} catch (error) {
 					console.error("Error loading source version:", error);
 					toast.error("Failed to load source version");
+					sourceLoadedRef.current = false; // Reset if there was an error
 				}
 			};
 			loadSourceVersion();
@@ -111,6 +114,9 @@ function HomeContent() {
 		setMode,
 		setStudioMode,
 		resetStreamingState,
+		isStreaming,
+		streamingContent,
+		streamingComplete,
 	]);
 
 	return (
