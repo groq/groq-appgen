@@ -237,23 +237,23 @@ export async function POST(request: Request) {
 					"Connection": "keep-alive",
 				},
 			});
+		} else {
+			// Non-streaming response (original behavior)
+			const chatCompletion = await generateWithFallback(prompt, model, false) as any;
+			let generatedHtml = chatCompletion.choices[0]?.message?.content || "";
+
+			// Extract HTML content from between backticks if present
+			if (generatedHtml.includes("```html")) {
+				const match = generatedHtml.match(/```html\n([\s\S]*?)\n```/);
+				generatedHtml = match ? match[1] : generatedHtml;
+			}
+
+			return NextResponse.json({
+				html: generatedHtml,
+				signature: signHtml(generatedHtml),
+				usage: chatCompletion.usage,
+			});
 		}
-
-		// Non-streaming response (original behavior)
-		const chatCompletion = await generateWithFallback(prompt, model, false) as any;
-		let generatedHtml = chatCompletion.choices[0]?.message?.content || "";
-
-		// Extract HTML content from between backticks if present
-		if (generatedHtml.includes("```html")) {
-			const match = generatedHtml.match(/```html\n([\s\S]*?)\n```/);
-			generatedHtml = match ? match[1] : generatedHtml;
-		}
-
-		return NextResponse.json({
-			html: generatedHtml,
-			signature: signHtml(generatedHtml),
-			usage: chatCompletion.usage,
-		});
 	} catch (error) {
 		console.error("Error generating HTML:", error);
 		return NextResponse.json(
