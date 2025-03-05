@@ -27,6 +27,7 @@ export default function PromptView() {
 		setDrawingData,
 		model,
 		setModel,
+		resetStreamingState,
 	} = useStudio();
 	const [showDrawing, setShowDrawing] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
@@ -37,6 +38,8 @@ export default function PromptView() {
 			toast.error("Describe your app or draw it!");
 			return;
 		}
+		resetStreamingState();
+		
 		setStudioMode(true);
 		setTriggerGeneration(true);
 	};
@@ -49,12 +52,18 @@ export default function PromptView() {
 	const handleSuggestionClick = (suggestion: string) => () => {
 		const example = APP_EXAMPLES.find((ex) => ex.label === suggestion);
 		setQuery(example?.prompt || suggestion);
+		
+		resetStreamingState();
+		
 		setStudioMode(true);
 		setTriggerGeneration(true);
 	};
 
 	const handleTranscription = (transcription: string) => {
 		setQuery(transcription);
+		
+		resetStreamingState();
+		
 		setStudioMode(true);
 		setTriggerGeneration(true);
 	};

@@ -71,29 +71,30 @@ async function tryVisionCompletion(imageData: string, model: string) {
 	});
 }
 
-async function tryCompletion(prompt: string, model: string) {
+async function tryCompletion(prompt: string, model: string, stream = false) {
 	return await client.chat.completions.create({
 		messages: [{ role: "user", content: prompt }],
 		model: model,
 		temperature: getModelTemperature(model),
 		max_tokens: 8192,
 		top_p: 1,
-		stream: false,
+		stream: stream,
 		stop: null,
 	});
 }
 
-async function generateWithFallback(prompt: string, model: string) {
+async function generateWithFallback(prompt: string, model: string, stream = false) {
 	try {
 		const chatCompletion = await tryCompletion(
 			prompt,
 			MAINTENANCE_USE_VANILLA_MODEL ? VANILLA_MODEL : model,
+			stream
 		);
 		return chatCompletion;
 	} catch (error) {
 		console.error("Primary model failed, trying fallback model:", error);
 		try {
-			const chatCompletion = await tryCompletion(prompt, getFallbackModel());
+			const chatCompletion = await tryCompletion(prompt, getFallbackModel(), stream);
 			return chatCompletion;
 		} catch (error) {
 			console.error("Error generating completion:", error);
@@ -132,7 +133,7 @@ export async function POST(request: Request) {
 	}
 
 	try {
-		const { query, currentHtml, feedback, theme, drawingData, model } =
+		const { query, currentHtml, feedback, theme, drawingData, model, stream = false } =
 			await request.json();
 		let finalQuery = query;
 		if (drawingData) {
@@ -147,11 +148,8 @@ export async function POST(request: Request) {
 			theme,
 		});
 
-		// Run safety check and code completion in parallel
-		const [safetyResult, chatCompletion] = await Promise.all([
-			checkContentSafety(prompt),
-			generateWithFallback(prompt, model),
-		]);
+		// Run safety check
+		const safetyResult = await checkContentSafety(prompt);
 
 		// Check safety result before proceeding
 		if (!safetyResult.safe) {
@@ -165,6 +163,84 @@ export async function POST(request: Request) {
 			);
 		}
 
+		// If streaming is requested, return a streaming response
+		if (stream) {
+			const encoder = new TextEncoder();
+			const streamingCompletion = await generateWithFallback(prompt, model, true);
+			
+			const responseStream = new ReadableStream({
+				async start(controller) {
+					// Send initial message
+					controller.enqueue(encoder.encode(JSON.stringify({ type: "start" }) + "\n"));
+					
+					try {
+						let fullContent = "";
+						let reasoning = "";
+						
+						// Handle streaming response
+						for await (const chunk of streamingCompletion as any) {
+							const content = chunk.choices[0]?.delta?.content || "";
+							if (content) {
+								fullContent += content;
+								reasoning += content;
+								
+								// Send the chunk to the client
+								controller.enqueue(
+									encoder.encode(
+										JSON.stringify({
+											type: "chunk",
+											content,
+											reasoning,
+										}) + "\n"
+									)
+								);
+							}
+						}
+						
+						// Extract HTML content from between backticks if present
+						let generatedHtml = fullContent;
+						if (generatedHtml.includes("```html")) {
+							const match = generatedHtml.match(/```html\n([\s\S]*?)\n```/);
+							generatedHtml = match ? match[1] : generatedHtml;
+						}
+						
+						// Send the final HTML and close the stream
+						controller.enqueue(
+							encoder.encode(
+								JSON.stringify({
+									type: "complete",
+									html: generatedHtml,
+									signature: signHtml(generatedHtml),
+								}) + "\n"
+							)
+						);
+						controller.close();
+					} catch (error) {
+						console.error("Error in stream:", error);
+						controller.enqueue(
+							encoder.encode(
+								JSON.stringify({
+									type: "error",
+									error: "Error generating content",
+								}) + "\n"
+							)
+						);
+						controller.close();
+					}
+				},
+			});
+			
+			return new Response(responseStream, {
+				headers: {
+					"Content-Type": "text/event-stream",
+					"Cache-Control": "no-cache",
+					"Connection": "keep-alive",
+				},
+			});
+		}
+
+		// Non-streaming response (original behavior)
+		const chatCompletion = await generateWithFallback(prompt, model, false) as any;
 		let generatedHtml = chatCompletion.choices[0]?.message?.content || "";
 
 		// Extract HTML content from between backticks if present

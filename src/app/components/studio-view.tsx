@@ -52,14 +52,20 @@ function HomeContent() {
 		setStudioMode,
 		isApplying,
 		isGenerating,
+		isStreaming,
+		streamingContent,
+		streamingComplete,
+		resetStreamingState,
 	} = useStudio();
 	const { resolvedTheme } = useTheme();
-		const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
+	const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
 	
 	useEffect(() => {
 		const source = searchParams.get("source");
 		if (source) {
 			const loadSourceVersion = async () => {
+				resetStreamingState();
+				
 				try {
 					const response = await fetch(`/api/apps/${source}`);
 					if (!response.ok) {
@@ -104,6 +110,7 @@ function HomeContent() {
 		setHistoryIndex,
 		setMode,
 		setStudioMode,
+		resetStreamingState,
 	]);
 
 	return (
@@ -163,7 +170,7 @@ function HomeContent() {
 
 			{/* Main Content */}
 			<div className="flex flex-1 overflow-hidden">
-				{/* Left Column - Code View */}
+				{/* Left Column - Code View or Streaming Content */}
 				<div className="w-1/2 p-4 border-r overflow-auto lg:block hidden">
 					<div className="relative h-full">
 						<div
@@ -172,14 +179,38 @@ function HomeContent() {
 								isGenerating || isApplying ? "opacity-100" : "opacity-0",
 							)}
 						/>
-						<SyntaxHighlighter
-							language="html"
-							style={resolvedTheme === "dark" ? vscDarkPlus : vs}
-							className="h-full rounded"
-							customStyle={{ margin: 0, height: "100%", width: "100%" }}
-						>
-							{currentHtml || "<!-- HTML preview will appear here -->"}
-						</SyntaxHighlighter>
+						
+						{isStreaming ? (
+							// Streaming content view - match SyntaxHighlighter background
+							<div 
+								className="h-full rounded font-mono text-sm overflow-auto p-4"
+								style={{ 
+									backgroundColor: resolvedTheme === "dark" ? "#1E1E1E" : "#f5f5f5",
+									color: resolvedTheme === "dark" ? "#D4D4D4" : "#000000"
+								}}
+							>
+								<div className="flex items-center mb-4">
+									<div className="h-2 w-2 rounded-full bg-groq mr-2 animate-pulse"></div>
+									<span className="text-xs text-muted-foreground">
+										Generating your app...
+									</span>
+								</div>
+								<div className="whitespace-pre-wrap">
+									{streamingContent || "Thinking..."}
+								</div>
+							</div>
+						) : (
+							// Code view
+							<SyntaxHighlighter
+								language="html"
+								style={resolvedTheme === "dark" ? vscDarkPlus : vs}
+								className="h-full rounded"
+								customStyle={{ margin: 0, height: "100%", width: "100%" }}
+							>
+								{currentHtml || "<!-- HTML preview will appear here -->"}
+							</SyntaxHighlighter>
+						)}
+						
 						<div className="absolute bottom-4 left-4">
 							<CopyButton code={currentHtml} />
 						</div>
@@ -189,6 +220,29 @@ function HomeContent() {
 				{/* Right Column - Preview */}
 				<div className="lg:w-1/2 w-full overflow-hidden">
 					<div className="h-full p-4 relative">
+						{/* Mobile Code View - Only shown when streaming or generating */}
+						{(isStreaming || isGenerating) && (
+							<div 
+								className="lg:hidden block mb-4 border rounded shadow-sm p-4"
+								style={{ 
+									backgroundColor: resolvedTheme === "dark" ? "#1E1E1E" : "#f5f5f5",
+									color: resolvedTheme === "dark" ? "#D4D4D4" : "#000000"
+								}}
+							>
+								<div className="flex items-center mb-2">
+									<div className="h-2 w-2 rounded-full bg-groq mr-2 animate-pulse"></div>
+									<span className="text-xs text-muted-foreground">
+										{isStreaming ? "Generating your app..." : "Processing..."}
+									</span>
+								</div>
+								{isStreaming && (
+									<div className="whitespace-pre-wrap font-mono text-xs max-h-[200px] overflow-auto">
+										{streamingContent || "Thinking..."}
+									</div>
+								)}
+							</div>
+						)}
+						
 						<div className="absolute top-6 right-6 flex gap-2 z-10">
 							<ReloadButton iframeRef={iframeRef} />
 							<ShareButton
