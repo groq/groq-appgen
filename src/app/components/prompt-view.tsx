@@ -170,7 +170,7 @@ export default function PromptView() {
 					</h2>
 				</Link>
 				<div className="max-w-[1200px] mx-auto">
-					<GalleryListing limit={10} />
+					<GalleryListing limit={10} view="trending" />
 				</div>
 				<div className="w-full flex justify-center mt-10">
 					<Link
