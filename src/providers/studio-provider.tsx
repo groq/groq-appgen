@@ -37,12 +37,24 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 	const { resolvedTheme } = useTheme();
 	const [feedbackHistory, setFeedbackHistory] = useState<string[]>([]);
 	const [feedbackHistoryIndex, setFeedbackHistoryIndex] = useState(-1);
-	const [model, setModel] = useState(MODEL_OPTIONS[0])
+	const [model, setModel] = useState(() => {
+		if (typeof window !== "undefined") {
+			return localStorage.getItem("selectedModel") || MODEL_OPTIONS[0];
+		}
+		return MODEL_OPTIONS[0];
+	});
 
 	// New streaming state
 	const [isStreaming, setIsStreaming] = useState(false);
 	const [streamingContent, setStreamingContent] = useState("");
 	const [streamingComplete, setStreamingComplete] = useState(false);
+
+	// Effect to update localStorage when model changes
+	useEffect(() => {
+		if (typeof window !== "undefined" && model) {
+			localStorage.setItem("selectedModel", model);
+		}
+	}, [model]);
 
 	// Helper function to reset streaming state
 	const resetStreamingState = () => {

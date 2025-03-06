@@ -2,11 +2,15 @@ import { ChevronDown, Check } from "lucide-react";
 import { MODEL_OPTIONS } from "@/utils/models";
 import { useState, useEffect, useRef } from "react";
 
-const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
+const ModelSelector = ({ options = MODEL_OPTIONS, onChange, initialModel }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(() =>
-    typeof window !== "undefined" ? localStorage.getItem("selectedModel") || options[0] : options[0]
-  );
+  const [selectedModel, setSelectedModel] = useState(() => {
+    if (initialModel) return initialModel;
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("selectedModel") || options[0];
+    }
+    return options[0];
+  });
   const [dropdownPosition, setDropdownPosition] = useState("right");
   const dropdownRef = useRef(null);
 
@@ -19,7 +23,14 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
         if (onChange) onChange(storedModel);
       }
     }
-  }, [onChange]);
+  }, []);
+
+  // Update selectedModel when initialModel changes
+  useEffect(() => {
+    if (initialModel && initialModel !== selectedModel) {
+      setSelectedModel(initialModel);
+    }
+  }, [initialModel]);
 
   const handleSelect = (model) => {
     setSelectedModel(model);

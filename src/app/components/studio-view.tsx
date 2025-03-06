@@ -56,6 +56,8 @@ function HomeContent() {
 		streamingContent,
 		streamingComplete,
 		resetStreamingState,
+		model,
+		setModel,
 	} = useStudio();
 	const { resolvedTheme } = useTheme();
 	const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
@@ -147,7 +149,8 @@ function HomeContent() {
 							<div className="w-full">
 								<ModelSelector
 									options={MODEL_OPTIONS}
-									onChange={setSelectedModel}
+									onChange={setModel}
+									initialModel={model}
 								/>
 							</div>
 						</div>
@@ -167,7 +170,8 @@ function HomeContent() {
 						</div>
 						<ModelSelector
 							options={MODEL_OPTIONS}
-							onChange={setSelectedModel}
+							onChange={setModel}
+							initialModel={model}
 						/>
 						<OptionsButton />
 					</div>
