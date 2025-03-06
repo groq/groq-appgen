@@ -12,17 +12,17 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         type: "text",
         maxTokens: 131072
     },
-    "llama-3.3-70b-versatile": {
-        name: "llama-3.3-70b-versatile",
+    "qwen-2.5-coder-32b": {
+        name: "qwen-2.5-coder-32b",
         temperature: 0.1,
         type: "text",
-        maxTokens: 32768
+        maxTokens: 131072
     },
-    "llama-3.3-70b-specdec": {
-        name: "llama-3.3-70b-specdec",
+    "qwen-2.5-32b": {
+        name: "qwen-2.5-32b",
         temperature: 0.1,
         type: "text",
-        maxTokens: 32768
+        maxTokens: 131072
     },
     "deepseek-r1-distill-llama-70b": {
         name: "deepseek-r1-distill-llama-70b",
@@ -35,6 +35,18 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         temperature: 0.6,
         type: "text",
         maxTokens: 16384
+    },
+    "llama-3.3-70b-versatile": {
+        name: "llama-3.3-70b-versatile",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 32768
+    },
+    "llama-3.3-70b-specdec": {
+        name: "llama-3.3-70b-specdec",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 32768
     },
     "llama-3.2-90b-vision-preview": {
         name: "llama-3.2-90b-vision-preview",
