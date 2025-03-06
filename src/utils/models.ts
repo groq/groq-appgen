@@ -20,6 +20,11 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         temperature: 0.6,
         type: "text"
     },
+    "qwen-qwq-32b": {
+        name: "qwen-qwq-32b",
+        temperature: 0.6,
+        type: "text"
+    },
     "deepseek-r1-distill-llama-70b-specdec": {
         name: "deepseek-r1-distill-llama-70b-specdec",
         temperature: 0.6,
