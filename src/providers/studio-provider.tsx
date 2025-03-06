@@ -117,8 +117,10 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 								const data = JSON.parse(line);
 								
 								if (data.type === "chunk") {
-									reasoning = data.reasoning;
-									setStreamingContent(reasoning);
+									// Simply append the new content to our streamingContent state
+									setStreamingContent(prev => prev + data.content);
+									// Also update reasoning for history
+									reasoning += data.content;
 								} else if (data.type === "complete") {
 									html = data.html;
 									signature = data.signature;
@@ -211,6 +213,9 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 						feedback: currentFeedback.trim(),
 						theme: resolvedTheme,
 						stream: true,
+						model: model,
+						sessionId,
+						version: history.length > 0 ? String(history.length + 1) : "1",
 					}),
 				});
 
@@ -260,8 +265,10 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 									const data = JSON.parse(line);
 									
 									if (data.type === "chunk") {
-										reasoning = data.reasoning;
-										setStreamingContent(reasoning);
+										// Simply append the new content to our streamingContent state
+										setStreamingContent(prev => prev + data.content);
+										// Also update reasoning for history
+										reasoning += data.content;
 									} else if (data.type === "complete") {
 										html = data.html;
 										signature = data.signature;

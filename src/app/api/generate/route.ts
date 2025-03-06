@@ -176,22 +176,19 @@ export async function POST(request: Request) {
 					
 					try {
 						let fullContent = "";
-						let reasoning = "";
 						
 						// Handle streaming response
 						for await (const chunk of streamingCompletion as any) {
 							const content = chunk.choices[0]?.delta?.content || "";
 							if (content) {
 								fullContent += content;
-								reasoning += content;
 								
-								// Send the chunk to the client
+								// Send just the new content chunk to the client
 								controller.enqueue(
 									encoder.encode(
 										JSON.stringify({
 											type: "chunk",
-											content,
-											reasoning,
+											content: content,
 										}) + "\n"
 									)
 								);
