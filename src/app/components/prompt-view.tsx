@@ -30,7 +30,12 @@ export default function PromptView() {
 		resetStreamingState,
 	} = useStudio();
 	const [showDrawing, setShowDrawing] = useState(false);
-	const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
+	const [selectedModel, setSelectedModel] = useState(() => {
+		if (typeof window !== "undefined") {
+			return localStorage.getItem("selectedModel") || MODEL_OPTIONS[0];
+		}
+		return MODEL_OPTIONS[0];
+	});
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -132,6 +137,7 @@ export default function PromptView() {
 							setSelectedModel(model);
 							setModel(model); // This will update both local and global states
 						}}
+						initialModel={model}
 						/>
 						<Button
 							className="rounded-full"
