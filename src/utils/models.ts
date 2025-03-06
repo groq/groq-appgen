@@ -5,6 +5,11 @@ interface ModelConfig {
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
+    "qwen-qwq-32b": {
+        name: "qwen-qwq-32b",
+        temperature: 0.6,
+        type: "text"
+    },
     "llama-3.3-70b-versatile": {
         name: "llama-3.3-70b-versatile",
         temperature: 0.1,
@@ -17,11 +22,6 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     },
     "deepseek-r1-distill-llama-70b": {
         name: "deepseek-r1-distill-llama-70b",
-        temperature: 0.6,
-        type: "text"
-    },
-    "qwen-qwq-32b": {
-        name: "qwen-qwq-32b",
         temperature: 0.6,
         type: "text"
     },
