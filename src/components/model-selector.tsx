@@ -7,6 +7,7 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
   const [selectedModel, setSelectedModel] = useState(() =>
     typeof window !== "undefined" ? localStorage.getItem("selectedModel") || options[0] : options[0]
   );
+  const [dropdownPosition, setDropdownPosition] = useState("right");
   const dropdownRef = useRef(null);
 
   // Sync with localStorage on mount
@@ -29,6 +30,21 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
     setIsOpen(false);
   };
 
+  // Calculate position before opening the dropdown
+  const toggleDropdown = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      
+      if (rect.right + 300 > viewportWidth) {
+        setDropdownPosition("left");
+      } else {
+        setDropdownPosition("right");
+      }
+    }
+    setIsOpen(!isOpen);
+  };
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -45,7 +61,7 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange }) => {
   return (
     <div ref={dropdownRef} className="relative w-full md:w-auto">
       <div
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleDropdown}
         className="flex items-center justify-end gap-2 cursor-pointer bg-transparent hover:bg-accent hover:text-accent-foreground
 rounded-lg p-2 transition-colors"
       >
@@ -56,7 +72,9 @@ rounded-lg p-2 transition-colors"
       </div>
 
       {isOpen && (
-        <ul className="absolute z-50 mt-2 w-full md:w-[300px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
+        <ul 
+          className={`absolute z-50 mt-2 ${dropdownPosition === "left" ? "right-0" : "left-0"} w-full md:w-[300px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-[50vh] overflow-y-auto`}
+        >
           {options.map((option) => (
             <li
               key={option}
