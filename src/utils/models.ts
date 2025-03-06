@@ -6,15 +6,15 @@ interface ModelConfig {
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
-    "qwen-qwq-32b": {
-        name: "qwen-qwq-32b",
-        temperature: 0.6,
-        type: "text",
-        maxTokens: 131072
-    },
     "qwen-2.5-coder-32b": {
         name: "qwen-2.5-coder-32b",
         temperature: 0.1,
+        type: "text",
+        maxTokens: 131072
+    },
+    "qwen-qwq-32b": {
+        name: "qwen-qwq-32b",
+        temperature: 0.6,
         type: "text",
         maxTokens: 131072
     },
