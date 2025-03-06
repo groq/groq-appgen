@@ -23,14 +23,14 @@ const ModelSelector = ({ options = MODEL_OPTIONS, onChange, initialModel }) => {
         if (onChange) onChange(storedModel);
       }
     }
-  }, []);
+  }, [onChange]);
 
   // Update selectedModel when initialModel changes
   useEffect(() => {
     if (initialModel && initialModel !== selectedModel) {
       setSelectedModel(initialModel);
     }
-  }, [initialModel]);
+  }, [initialModel, selectedModel]);
 
   const handleSelect = (model) => {
     setSelectedModel(model);
