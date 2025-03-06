@@ -2,33 +2,39 @@ interface ModelConfig {
     name: string;
     temperature: number;
     type: "text" | "vision";
+    maxTokens?: number;
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     "qwen-qwq-32b": {
         name: "qwen-qwq-32b",
         temperature: 0.6,
-        type: "text"
+        type: "text",
+        maxTokens: 131072
     },
     "llama-3.3-70b-versatile": {
         name: "llama-3.3-70b-versatile",
         temperature: 0.1,
-        type: "text"
+        type: "text",
+        maxTokens: 32768
     },
     "llama-3.3-70b-specdec": {
         name: "llama-3.3-70b-specdec",
         temperature: 0.1,
-        type: "text"
+        type: "text",
+        maxTokens: 32768
     },
     "deepseek-r1-distill-llama-70b": {
         name: "deepseek-r1-distill-llama-70b",
         temperature: 0.6,
-        type: "text"
+        type: "text",
+        maxTokens: 16384
     },
     "deepseek-r1-distill-llama-70b-specdec": {
         name: "deepseek-r1-distill-llama-70b-specdec",
         temperature: 0.6,
-        type: "text"
+        type: "text",
+        maxTokens: 16384
     },
     "llama-3.2-90b-vision-preview": {
         name: "llama-3.2-90b-vision-preview",
@@ -44,6 +50,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
 
 // Default temperature if model not found in configs
 const DEFAULT_TEMPERATURE = 0.1;
+const DEFAULT_MAX_TOKENS = 8192;
 
 // Export only text-based models for MODEL_OPTIONS
 export const MODEL_OPTIONS = Object.entries(MODEL_CONFIGS)
@@ -52,6 +59,10 @@ export const MODEL_OPTIONS = Object.entries(MODEL_CONFIGS)
 
 export function getModelTemperature(modelName: string): number {
     return MODEL_CONFIGS[modelName]?.temperature ?? DEFAULT_TEMPERATURE;
+}
+
+export function getModelMaxTokens(modelName: string): number {
+    return MODEL_CONFIGS[modelName]?.maxTokens ?? DEFAULT_MAX_TOKENS;
 }
 
 export function getModelConfig(modelName: string): ModelConfig {

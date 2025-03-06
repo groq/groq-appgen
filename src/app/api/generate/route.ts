@@ -8,7 +8,8 @@ import {
 	PRIMARY_VISION_MODEL,
 	FALLBACK_VISION_MODEL,
 	getFallbackModel,
-	getModelTemperature
+	getModelTemperature,
+	getModelMaxTokens
 } from "@/utils/models";
 import {
 	MAINTENANCE_GENERATION,
@@ -76,7 +77,7 @@ async function tryCompletion(prompt: string, model: string, stream = false) {
 		messages: [{ role: "user", content: prompt }],
 		model: model,
 		temperature: getModelTemperature(model),
-		max_tokens: 8192,
+		max_tokens: getModelMaxTokens(model),
 		top_p: 1,
 		stream: stream,
 		stop: null,
