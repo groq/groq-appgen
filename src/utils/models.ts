@@ -10,13 +10,13 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         name: "qwen-2.5-coder-32b",
         temperature: 0.1,
         type: "text",
-        maxTokens: 131072
+        maxTokens: 32768
     },
     "qwen-qwq-32b": {
         name: "qwen-qwq-32b",
         temperature: 0.6,
         type: "text",
-        maxTokens: 131072
+        maxTokens: 32768
     },
     "deepseek-r1-distill-llama-70b": {
         name: "deepseek-r1-distill-llama-70b",
@@ -34,7 +34,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         name: "qwen-2.5-32b",
         temperature: 0.1,
         type: "text",
-        maxTokens: 131072
+        maxTokens: 32768
     },
     "llama-3.3-70b-versatile": {
         name: "llama-3.3-70b-versatile",
