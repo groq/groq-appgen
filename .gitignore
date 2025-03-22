@@ -1,4 +1,5 @@
 notes.txt
+.env.local
 
 # Dependencies
 node_modules/

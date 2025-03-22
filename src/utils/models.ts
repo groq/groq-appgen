@@ -3,6 +3,7 @@ interface ModelConfig {
     temperature: number;
     type: "text" | "vision";
     maxTokens?: number;
+    provider?: "groq" | "gemini";
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
@@ -53,11 +54,34 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         temperature: 0.1,
         type: "vision"
     },
+    
     "llama-3.2-11b-vision-preview": {
         name: "llama-3.2-11b-vision-preview",
         temperature: 0.1,
         type: "vision"
-    }
+    },
+      // Add Gemini models
+      "gemini-2.0-flash-lite": {
+        name: "gemini-2.0-flash-lite",
+        temperature: 0.6,
+        type: "text",
+        maxTokens: 8192,
+        provider: "gemini"
+    },
+    "gemini-2.0-pro": {
+        name: "gemini-2.0-pro", 
+        temperature: 0.7,
+        type: "text",
+        maxTokens: 8192,
+        provider: "gemini"
+    },
+    "gemini-2.0-pro-vision": {
+        name: "gemini-2.0-pro-vision",
+        temperature: 0.7,
+        type: "vision",
+        maxTokens: 4096,
+        provider: "gemini"
+    }  
 };
 
 // Default temperature if model not found in configs
@@ -68,6 +92,16 @@ const DEFAULT_MAX_TOKENS = 8192;
 export const MODEL_OPTIONS = Object.entries(MODEL_CONFIGS)
     .filter(([_, config]) => config.type === "text")
     .map(([key, _]) => key);
+
+// Helper to determine which provider to use
+export function getModelProvider(modelName: string): "groq" | "gemini" {
+    return MODEL_CONFIGS[modelName]?.provider || "groq";
+}
+   
+// Helper to check if it's a Gemini model
+export function isGeminiModel(modelName: string): boolean {
+    return getModelProvider(modelName) === "gemini";
+}
 
 export function getModelTemperature(modelName: string): number {
     return MODEL_CONFIGS[modelName]?.temperature ?? DEFAULT_TEMPERATURE;

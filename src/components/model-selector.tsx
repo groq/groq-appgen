@@ -1,5 +1,7 @@
+"use client"
+
 import { ChevronDown, Check } from "lucide-react";
-import { MODEL_OPTIONS } from "@/utils/models";
+import { MODEL_OPTIONS, getModelProvider } from "@/utils/models";
 import { useState, useEffect, useRef } from "react";
 
 interface ModelSelectorProps {
@@ -17,23 +19,32 @@ const ModelSelector = ({
   const [selectedModel, setSelectedModel] = useState(() => {
     if (initialModel) return initialModel;
     if (typeof window !== "undefined") {
-      return localStorage.getItem("selectedModel") || options[0];
+      const stored = localStorage.getItem("selectedModel");
+      return stored && options.includes(stored) ? stored : options[0];
     }
     return options[0];
   });
   const [dropdownPosition, setDropdownPosition] = useState("right");
   const dropdownRef = useRef(null);
 
+  // Group models by provider
+  const groupedOptions = options.reduce((acc, model) => {
+    const provider = getModelProvider?.(model) || "groq";
+    if (!acc[provider]) acc[provider] = [];
+    acc[provider].push(model);
+    return acc;
+  }, {} as Record<string, string[]>);
+
   // Sync with localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedModel = localStorage.getItem("selectedModel");
-      if (storedModel) {
+      if (storedModel && options.includes(storedModel)) {
         setSelectedModel(storedModel);
         if (onChange) onChange(storedModel);
       }
     }
-  }, [onChange]);
+  }, [onChange, options]);
 
   // Update selectedModel when initialModel changes
   useEffect(() => {
@@ -83,33 +94,47 @@ const ModelSelector = ({
     <div ref={dropdownRef} className="relative w-full md:w-auto">
       <div
         onClick={toggleDropdown}
-        className="flex items-center justify-end gap-2 cursor-pointer bg-transparent hover:bg-accent hover:text-accent-foreground
-rounded-lg p-2 transition-colors"
+        className="flex items-center justify-between px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
       >
-        <span className="text-black dark:text-white text-right">{selectedModel}</span>
-        <ChevronDown
-          className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""} text-black dark:text-white`}
-        />
+        <span className="text-sm">{selectedModel}</span>
+        <ChevronDown className="w-4 h-4 ml-2" />
       </div>
 
       {isOpen && (
-        <ul 
-          className={`absolute z-50 mt-2 ${dropdownPosition === "left" ? "right-0" : "left-0"} w-full md:w-[300px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-[50vh] overflow-y-auto`}
-        >
-          {options.map((option) => (
-            <li
-              key={option}
-              onClick={() => handleSelect(option)}
-              className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-accent hover:text-accent-foreground
- transition-colors gap-4 ${
-                selectedModel === option ? "bg-transparent text-blue-600 dark:text-blue-400" : "text-black dark:text-white"
-              }`}
-            >
-              <span>{option}</span>
-              {selectedModel === option && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-            </li>
-          ))}
-        </ul>
+        <div className={`absolute z-50 ${dropdownPosition === "left" ? "right-0" : "left-0"} mt-1 w-72 bg-white dark:bg-gray-800 border rounded-md shadow-lg max-h-96 overflow-y-auto`}>
+          {Object.keys(groupedOptions).length > 1 ? (
+            // Show grouped providers if we have multiple
+            Object.entries(groupedOptions).map(([provider, providerModels]) => (
+              <div key={provider}>
+                <div className="px-3 py-2 text-xs font-semibold bg-gray-100 dark:bg-gray-700">
+                  {provider.toUpperCase()}
+                </div>
+                {providerModels.map((model) => (
+                  <div
+                    key={model}
+                    className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={() => handleSelect(model)}
+                  >
+                    <span className="text-sm">{model}</span>
+                    {selectedModel === model && <Check className="w-4 h-4" />}
+                  </div>
+                ))}
+              </div>
+            ))
+          ) : (
+            // Simple list if just one provider
+            options.map((model) => (
+              <div
+                key={model}
+                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => handleSelect(model)}
+              >
+                <span className="text-sm">{model}</span>
+                {selectedModel === model && <Check className="w-4 h-4" />}
+              </div>
+            ))
+          )}
+        </div>
       )}
     </div>
   );
