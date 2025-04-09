@@ -6,6 +6,18 @@ interface ModelConfig {
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
+    "llama-4-maverick-17b-128e-instruct": {
+        name: "meta-llama/llama-4-maverick-17b-128e-instruct",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 8192
+    },
+    "llama-4-scout-17b-16e-instruct": {
+        name: "meta-llama/llama-4-scout-17b-16e-instruct",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 8192
+    },
     "qwen-2.5-coder-32b": {
         name: "qwen-2.5-coder-32b",
         temperature: 0.1,
