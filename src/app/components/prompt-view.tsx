@@ -30,12 +30,6 @@ export default function PromptView() {
 		resetStreamingState,
 	} = useStudio();
 	const [showDrawing, setShowDrawing] = useState(false);
-	const [selectedModel, setSelectedModel] = useState(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("selectedModel") || MODEL_OPTIONS[0];
-		}
-		return MODEL_OPTIONS[0];
-	});
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -133,9 +127,8 @@ export default function PromptView() {
 						</div>
 						<div className="flex items-center gap-2 ml-auto">
 						<ModelSelector
-						onChange={(model) => {
-							setSelectedModel(model);
-							setModel(model); // This will update both local and global states
+						onChange={(newModel) => {
+							setModel(newModel);
 						}}
 						initialModel={model}
 						/>

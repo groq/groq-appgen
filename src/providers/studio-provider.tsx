@@ -39,7 +39,10 @@ const [StudioProvider, useStudio] = providerFactory(() => {
 	const [feedbackHistoryIndex, setFeedbackHistoryIndex] = useState(-1);
 	const [model, setModel] = useState(() => {
 		if (typeof window !== "undefined") {
-			return localStorage.getItem("selectedModel") || MODEL_OPTIONS[0];
+			const storedModel = localStorage.getItem("selectedModel");
+			if (storedModel && MODEL_OPTIONS.includes(storedModel)) {
+				return storedModel;
+			}
 		}
 		return MODEL_OPTIONS[0];
 	});

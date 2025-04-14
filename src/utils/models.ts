@@ -6,16 +6,16 @@ interface ModelConfig {
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
-    "llama-4-maverick-17b-128e-instruct": {
+    "meta-llama/llama-4-maverick-17b-128e-instruct": {
         name: "meta-llama/llama-4-maverick-17b-128e-instruct",
         temperature: 0.1,
-        type: "text",
+        type: "vision",
         maxTokens: 8192
     },
-    "llama-4-scout-17b-16e-instruct": {
+    "meta-llama/llama-4-scout-17b-16e-instruct": {
         name: "meta-llama/llama-4-scout-17b-16e-instruct",
         temperature: 0.1,
-        type: "text",
+        type: "vision",
         maxTokens: 8192
     },
     "qwen-2.5-coder-32b": {
@@ -66,7 +66,6 @@ const DEFAULT_MAX_TOKENS = 8192;
 
 // Export only text-based models for MODEL_OPTIONS
 export const MODEL_OPTIONS = Object.entries(MODEL_CONFIGS)
-    .filter(([_, config]) => config.type === "text")
     .map(([key, _]) => key);
 
 export function getModelTemperature(modelName: string): number {
@@ -93,5 +92,5 @@ export function getFallbackModel(): string {
 export const PRIMARY_MODEL = "llama-3.3-70b-specdec";
 export const VANILLA_MODEL = "llama-3.3-70b-versatile";
 
-export const PRIMARY_VISION_MODEL = "llama-3.2-90b-vision-preview";
-export const FALLBACK_VISION_MODEL = "llama-3.2-11b-vision-preview";
+export const PRIMARY_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+export const FALLBACK_VISION_MODEL = "llama-3.2-90b-vision-preview";
