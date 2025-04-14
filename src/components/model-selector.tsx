@@ -17,30 +17,26 @@ const ModelSelector = ({
   const [selectedModel, setSelectedModel] = useState(() => {
     if (initialModel) return initialModel;
     if (typeof window !== "undefined") {
-      return localStorage.getItem("selectedModel") || options[0];
+      const storedModel = localStorage.getItem("selectedModel");
+      if (storedModel && options.includes(storedModel)) {
+        return storedModel;
+      }
     }
     return options[0];
   });
   const [dropdownPosition, setDropdownPosition] = useState("right");
   const dropdownRef = useRef(null);
 
-  // Sync with localStorage on mount
+  // Update selectedModel when initialModel changes externally
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedModel = localStorage.getItem("selectedModel");
-      if (storedModel) {
-        setSelectedModel(storedModel);
-        if (onChange) onChange(storedModel);
-      }
-    }
-  }, [onChange]);
-
-  // Update selectedModel when initialModel changes
-  useEffect(() => {
-    if (initialModel && initialModel !== selectedModel) {
+    if (initialModel && initialModel !== selectedModel && options.includes(initialModel)) {
       setSelectedModel(initialModel);
+    } else if (initialModel && !options.includes(initialModel)) {
+      const defaultModel = options[0];
+      setSelectedModel(defaultModel);
+      if (onChange) onChange(defaultModel);
     }
-  }, [initialModel, selectedModel]);
+  }, [initialModel, selectedModel, options, onChange]);
 
   const handleSelect = (model: string) => {
     setSelectedModel(model);
