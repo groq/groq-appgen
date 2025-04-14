@@ -112,6 +112,7 @@ async function getDrawingDescription(imageData: string): Promise<string> {
 		);
 		return chatCompletion.choices[0].message.content;
 	} catch (error) {
+		console.error("Error processing drawing:", error);
 		try {
 			const chatCompletion = await tryVisionCompletion(
 				imageData,
