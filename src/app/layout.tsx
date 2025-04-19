@@ -4,14 +4,14 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ROOT_URL } from "@/utils/config";
-import { ModeToggle } from "@/components/mode-toggle";
+// ModeToggle removido
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { MAINTENANCE_MODE } from "@/lib/settings";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "Groq Appgen",
+	title: "Nexus Gen",
 	description: "Interactive HTML editor with AI generation",
 
 	icons: {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		type: "website",
 		url: ROOT_URL,
-		title: "Groq Appgen",
+		title: "Nexus Gen",
 		description: "Interactive HTML editor with AI generation",
 		images: `${ROOT_URL}/og-labs.png`,
 	},
@@ -43,7 +43,6 @@ export default function RootLayout({
 					) : (
 						<>
 							{children}
-							<ModeToggle />
 							<Toaster position="bottom-right" />
 						</>
 					)}

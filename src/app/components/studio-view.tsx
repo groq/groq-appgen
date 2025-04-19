@@ -62,14 +62,14 @@ function HomeContent() {
 	const { resolvedTheme } = useTheme();
 	const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0]); // Default model
 	const sourceLoadedRef = useRef(false);
-	
+
 	useEffect(() => {
 		const source = searchParams.get("source");
 		if (source && !sourceLoadedRef.current) {
 			sourceLoadedRef.current = true;
 			const loadSourceVersion = async () => {
 				resetStreamingState();
-				
+
 				try {
 					const response = await fetch(`/api/apps/${source}`);
 					if (!response.ok) {
@@ -181,7 +181,7 @@ function HomeContent() {
 			{/* Main Content */}
 			<div className="flex flex-1 overflow-hidden">
 				{/* Left Column - Code View or Streaming Content */}
-				<div className="w-1/2 p-4 border-r overflow-auto lg:block hidden">
+				<div className="w-1/2 p-4 border-r overflow-auto lg:block hidden scrollbar-hide">
 					<div className="relative h-full">
 						<div
 							className={cn(
@@ -189,12 +189,12 @@ function HomeContent() {
 								isGenerating || isApplying ? "opacity-100" : "opacity-0",
 							)}
 						/>
-						
+
 						{isStreaming ? (
 							// Streaming content view - match SyntaxHighlighter background
-							<div 
+							<div
 								className="h-full rounded font-mono text-sm overflow-auto p-4"
-								style={{ 
+								style={{
 									backgroundColor: resolvedTheme === "dark" ? "#1E1E1E" : "#f5f5f5",
 									color: resolvedTheme === "dark" ? "#D4D4D4" : "#000000"
 								}}
@@ -220,7 +220,7 @@ function HomeContent() {
 								{currentHtml || "<!-- HTML preview will appear here -->"}
 							</SyntaxHighlighter>
 						)}
-						
+
 						<div className="absolute bottom-4 left-4">
 							<CopyButton code={currentHtml} />
 						</div>
@@ -232,9 +232,9 @@ function HomeContent() {
 					<div className="h-full p-4 relative">
 						{/* Mobile Code View - Only shown when streaming or generating */}
 						{(isStreaming || isGenerating) && (
-							<div 
+							<div
 								className="lg:hidden block mb-4 border rounded shadow-sm p-4"
-								style={{ 
+								style={{
 									backgroundColor: resolvedTheme === "dark" ? "#1E1E1E" : "#f5f5f5",
 									color: resolvedTheme === "dark" ? "#D4D4D4" : "#000000"
 								}}
@@ -246,13 +246,13 @@ function HomeContent() {
 									</span>
 								</div>
 								{isStreaming && (
-									<div className="whitespace-pre-wrap font-mono text-xs max-h-[200px] overflow-auto">
+									<div className="whitespace-pre-wrap font-mono text-xs max-h-[200px] overflow-auto scrollbar-hide">
 										{streamingContent || "Thinking..."}
 									</div>
 								)}
 							</div>
 						)}
-						
+
 						<div className="absolute top-6 right-6 flex gap-2 z-10">
 							<ReloadButton iframeRef={iframeRef} />
 							<ShareButton
@@ -291,7 +291,7 @@ function HomeContent() {
 								<X size={16} />
 							</Button>
 						</div>
-						<pre className="flex-1 text-sm bg-background p-4 rounded overflow-auto">
+						<pre className="flex-1 text-sm bg-background p-4 rounded overflow-auto scrollbar-hide">
 							{getFormattedOutput()}
 						</pre>
 					</div>

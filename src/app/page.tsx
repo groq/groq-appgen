@@ -2,11 +2,14 @@
 
 import { StudioProvider } from "@/providers/studio-provider";
 import MainView from "./components/main-view";
+import { SplashScreenWrapper } from "./components/splash-screen-wrapper";
 
 export default function Home() {
 	return (
 		<StudioProvider>
-			<MainView />
+			<SplashScreenWrapper>
+				<MainView />
+			</SplashScreenWrapper>
 		</StudioProvider>
 	);
 }

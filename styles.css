@@ -1,0 +1,41 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.new-workspace {
+    background-color: #007bff;
+    color: white;
+}
+
+.import-repo {
+    background-color: #6c757d;
+    color: white;
+}
+
+.icons {
+    margin-top: 20px;
+}
+
+.icon {
+    width: 30px;
+    height: 30px;
+    margin: 0 10px;
+}

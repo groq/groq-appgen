@@ -1,19 +1,22 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
+import { Mic, Loader } from "lucide-react";
 
 interface MicrophoneButtonProps {
 	onTranscription: (text: string) => void;
 	disabled?: boolean;
+	small?: boolean;
 }
 
 export function MicrophoneButton({
 	onTranscription,
 	disabled,
+	small = false,
 }: MicrophoneButtonProps) {
 	const [isRecording, setIsRecording] = useState(false);
-	const mediaRecorder = useRef(null);
-	const audioChunks = useRef([]);
+	const [isProcessing, setIsProcessing] = useState(false);
+	const mediaRecorder = useRef<MediaRecorder | null>(null);
+	const audioChunks = useRef<Blob[]>([]);
 
 	const startRecording = async () => {
 		try {
@@ -22,47 +25,61 @@ export function MicrophoneButton({
 			audioChunks.current = [];
 
 			mediaRecorder.current.ondataavailable = (event) => {
-				audioChunks.current.push(event.data);
+				if (event.data.size > 0) {
+					audioChunks.current.push(event.data);
+				}
 			};
 
 			mediaRecorder.current.onstop = async () => {
-				const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
-				const formData = new FormData();
-				formData.append("audio", audioBlob);
+				setIsProcessing(true);
+				setIsRecording(false);
 
 				try {
-					const response = await fetch("/api/transcribe", {
+					// Criar blob de áudio
+					const audioBlob = new Blob(audioChunks.current, { type: "audio/wav" });
+
+					// Criar FormData para enviar o arquivo
+					const formData = new FormData();
+					formData.append("file", audioBlob, "recording.wav");
+
+					// Enviar para a API de transcrição
+					const response = await fetch("/api/speech-to-text", {
 						method: "POST",
 						body: formData,
 					});
 
+					if (!response.ok) {
+						throw new Error('Falha ao transcrever áudio');
+					}
+
 					const data = await response.json();
-					if (response.ok) {
-						onTranscription(data.transcription);
-					} else {
-						console.error("Transcription failed:", data.error);
+
+					// Chamar o callback com o texto transcrito
+					if (data.text) {
+						onTranscription(data.text);
 					}
 				} catch (error) {
-					console.error("Error sending audio:", error);
-				}
+					console.error("Erro ao processar áudio:", error);
+				} finally {
+					setIsProcessing(false);
 
-				// Clean up the media stream
-				for (const track of stream.getTracks()) {
-					track.stop();
+					// Limpar o stream de áudio
+					for (const track of stream.getTracks()) {
+						track.stop();
+					}
 				}
 			};
 
 			mediaRecorder.current.start();
 			setIsRecording(true);
 		} catch (error) {
-			console.error("Error accessing microphone:", error);
+			console.error("Erro ao acessar microfone:", error);
 		}
 	};
 
 	const stopRecording = () => {
 		if (mediaRecorder.current && mediaRecorder.current.state !== "inactive") {
 			mediaRecorder.current.stop();
-			setIsRecording(false);
 		}
 	};
 
@@ -77,16 +94,21 @@ export function MicrophoneButton({
 	return (
 		<div className="relative">
 			<Button
-				disabled={disabled}
+				disabled={disabled || isProcessing}
 				type="button"
 				variant="ghost"
 				size="icon"
-				className={`rounded-full relative z-10 ${
+				className={`rounded-full shrink-0 flex items-center justify-center ${small ? 'p-0 w-8 h-8' : 'px-3 min-w-[40px]'} relative z-10 ${
+					isProcessing ? "text-gray-500" :
 					isRecording ? "text-orange-500 hover:text-orange-600" : ""
 				}`}
 				onClick={toggleRecording}
 			>
-				<Mic className="h-5 w-5" />
+				{isProcessing ? (
+					<Loader className={small ? "h-3.5 w-3.5 animate-spin" : "h-[1.375rem] w-[1.375rem] animate-spin"} />
+				) : (
+					<Mic className={small ? "h-3.5 w-3.5" : "h-[1.375rem] w-[1.375rem]"} />
+				)}
 			</Button>
 			{isRecording && (
 				<div className="absolute inset-0 z-0">

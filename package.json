@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:port": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "screenshot": "node screenshot.js",
+    "analyze": "ANALYZE=true next build",
+    "test": "jest"
   },
   "dependencies": {
     "@next/third-parties": "^15.1.2",
@@ -24,10 +28,12 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "groq-sdk": "^0.9.1",
+    "html2canvas": "^1.4.1",
     "ioredis": "^5.4.1",
     "lucide-react": "^0.468.0",
     "next": "14.2.23",
     "next-themes": "^0.4.4",
+    "node-fetch": "^2.7.0",
     "react": "^18",
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
@@ -37,18 +43,25 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.0.3"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8",
+    "puppeteer": "^24.6.1",
     "tailwindcss": "^3.3.0",
+    "ts-jest": "^29.3.2",
     "typescript": "^5"
   },
   "packageManager": "pnpm@10.6.5+sha512.cdf928fca20832cd59ec53826492b7dc25dc524d4370b6b4adbf65803d32efaa6c1c88147c0ae4e8d579a6c9eec715757b50d4fa35eea179d868eada4ed043af"

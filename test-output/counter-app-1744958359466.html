@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Counter App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white h-screen flex justify-center items-center">
+    <div class="counter-app p-10 rounded-lg bg-gray-800 shadow-lg">
+        <h1 class="text-3xl font-bold mb-4">Simple Counter App</h1>
+        <p class="text-2xl font-semibold mb-6" id="counter">Count: 0</p>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" id="increment-btn">Increment</button>
+        <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-4" id="decrement-btn">Decrement</button>
+        <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-4" id="reset-btn">Reset</button>
+    </div>
+
+    <script>
+        let count = 0;
+        const counterElement = document.getElementById('counter');
+        const incrementBtn = document.getElementById('increment-btn');
+        const decrementBtn = document.getElementById('decrement-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        incrementBtn.addEventListener('click', () => {
+            count++;
+            counterElement.textContent = `Count: ${count}`;
+        });
+
+        decrementBtn.addEventListener('click', () => {
+            count--;
+            counterElement.textContent = `Count: ${count}`;
+        });
+
+        resetBtn.addEventListener('click', () => {
+            count = 0;
+            counterElement.textContent = `Count: ${count}`;
+        });
+    </script>
+</body>
+</html>

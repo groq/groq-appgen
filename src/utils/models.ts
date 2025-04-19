@@ -24,6 +24,25 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         type: "text",
         maxTokens: 32768
     },
+    "deepseek-llama-70b": {
+        name: "deepseek-llama-70b",
+        temperature: 0.6,
+        type: "text",
+        maxTokens: 16384
+    },
+    "gemma-2-9b-it": {
+        name: "gemma-2-9b-it",
+        temperature: 0.7,
+        type: "text",
+        maxTokens: 8192
+    },
+    "whisper-large-v3-turbo": {
+        name: "whisper-large-v3-turbo",
+        temperature: 0.0,
+        type: "text",
+        maxTokens: 4096
+    },
+    // Manter modelos antigos para compatibilidade
     "qwen-qwq-32b": {
         name: "qwen-qwq-32b",
         temperature: 0.6,
@@ -64,9 +83,15 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
 const DEFAULT_TEMPERATURE = 0.1;
 const DEFAULT_MAX_TOKENS = 8192;
 
-// Export only text-based models for MODEL_OPTIONS
-export const MODEL_OPTIONS = Object.entries(MODEL_CONFIGS)
-    .map(([key, _]) => key);
+// Lista limitada de modelos disponíveis para seleção
+export const MODEL_OPTIONS = [
+    "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen-2.5-coder-32b",
+    "deepseek-llama-70b",
+    "gemma-2-9b-it",
+    "whisper-large-v3-turbo"
+];
 
 export function getModelTemperature(modelName: string): number {
     return MODEL_CONFIGS[modelName]?.temperature ?? DEFAULT_TEMPERATURE;

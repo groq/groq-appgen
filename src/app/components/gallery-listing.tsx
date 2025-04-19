@@ -24,39 +24,14 @@ export function GalleryListing({
 	limit,
 	view = "popular",
 }: GalleryListingProps) {
-	const { data: gallery, isLoading } = useSWR<GalleryItemWithUpvotes[]>(
-		view ? `/api/apps?view=${view}` : null,
-		async (url) => {
-			const response = await fetch(url);
-			if (!response.ok) {
-				throw new Error("Failed to fetch gallery");
-			}
-			return response.json();
-		},
-		{
-			revalidateOnFocus: false,
-			dedupingInterval: 30000, // Match the server-side cache of 30 seconds
-		},
+	// Desabilitado temporariamente para testes
+	return (
+		<div className="text-center text-gray-500 py-8 border border-dashed border-gray-300 rounded-lg">
+			Galeria temporariamente indisponível durante os testes
+		</div>
 	);
 
-	if (isLoading) {
-		return (
-			<div className="text-center text-gray-500 py-8">
-				<Spinner className="mx-auto" />
-			</div>
-		);
-	}
-
-	if (!gallery?.length) {
-		return (
-			<div className="text-center text-gray-500 py-8">
-				{view === "trending"
-					? "No trending apps in the last 24 hours"
-					: "No apps found"}
-			</div>
-		);
-	}
-
+	/* Original code commented out for testing
 	return (
 		<div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 md:gap-6 xl:gap-8 justify-items-center">
 			{(limit ? gallery.slice(0, limit) : gallery).map((item) => (
@@ -103,4 +78,5 @@ export function GalleryListing({
 			))}
 		</div>
 	);
+*/
 }
