@@ -13,6 +13,143 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulse-slow {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes pulse-very-slow {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes pulse-fast {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulseOpacity {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes binaryFade {
+  0% {
+    opacity: 0.1;
+  }
+  25% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  75% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes binaryMove {
+  0% {
+    transform: translateY(-5px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes energyFlow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes energyFlowReverse {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes energyFlowDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes energyFlowUp {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .loading-animation {
   background-size: 200% 100%;
   background-image: linear-gradient(
@@ -102,5 +239,84 @@
   }
   body {
     @apply bg-background text-foreground;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
   }
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for all elements */
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+.binary-animation {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  animation: binaryFade 3s infinite ease-in-out;
+}
+
+.binary-animation::before {
+  content: "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  font-family: monospace;
+  font-size: 14px;
+  color: rgba(255, 165, 0, 0.3);
+  text-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
+  letter-spacing: 2px;
+  line-height: 1.5;
+  transform: rotate(0deg);
+  animation: binaryMove 10s infinite ease-in-out;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.animate-pulse-opacity {
+  animation: pulseOpacity 3s infinite ease-in-out;
+}
+
+.animate-energy-flow {
+  animation: energyFlow 2s linear infinite;
+}
+
+.animate-energy-flow-reverse {
+  animation: energyFlowReverse 2s linear infinite;
+}
+
+.animate-energy-flow-down {
+  animation: energyFlowDown 2s linear infinite;
+}
+
+.animate-energy-flow-up {
+  animation: energyFlowUp 2s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Estilos para o splash screen */
+.binary-code {
+  font-family: monospace;
+  line-height: 1.2;
+  letter-spacing: 2px;
+}
+
+.binary-line {
+  animation: binaryFade 3s infinite ease-in-out;
+  margin-bottom: 2px;
+}
+
+.binary-line span {
+  margin-right: 2px;
 }

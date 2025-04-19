@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Counter App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white h-screen flex justify-center items-center" id="theme">
+    <div class="counter-app p-10 rounded-lg bg-gray-800 shadow-lg">
+        <h1 class="text-3xl font-bold mb-4">Simple Counter App</h1>
+        <p class="text-2xl font-semibold mb-6" id="counter">Count: 0</p>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" id="increment-btn">Increment</button>
+        <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-4" id="decrement-btn">Decrement</button>
+        <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-4" id="reset-btn">Reset</button>
+        <button class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-4" id="theme-btn">Toggle Theme</button>
+    </div>
+
+    <script>
+        let count = 0;
+        const counterElement = document.getElementById('counter');
+        const incrementBtn = document.getElementById('increment-btn');
+        const decrementBtn = document.getElementById('decrement-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const themeBtn = document.getElementById('theme-btn');
+        let isDarkMode = true;
+
+        incrementBtn.addEventListener('click', () => {
+            count++;
+            updateCounter();
+        });
+
+        decrementBtn.addEventListener('click', () => {
+            count--;
+            updateCounter();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            count = 0;
+            updateCounter();
+        });
+
+        themeBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.remove('bg-white');
+                document.body.classList.add('bg-gray-900');
+                document.body.classList.remove('text-gray-900');
+                document.body.classList.add('text-white');
+            } else {
+                document.body.classList.remove('bg-gray-900');
+                document.body.classList.add('bg-white');
+                document.body.classList.remove('text-white');
+                document.body.classList.add('text-gray-900');
+            }
+        });
+
+        function updateCounter() {
+            counterElement.textContent = `Count: ${count}`;
+            if (count > 0) {
+                counterElement.classList.remove('text-red-600', 'text-gray-600');
+                counterElement.classList.add('text-green-600');
+            } else if (count < 0) {
+                counterElement.classList.remove('text-green-600', 'text-gray-600');
+                counterElement.classList.add('text-red-600');
+            } else {
+                counterElement.classList.remove('text-green-600', 'text-red-600');
+                counterElement.classList.add('text-gray-600');
+            }
+        }
+    </script>
+</body>
+</html>

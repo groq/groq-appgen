@@ -8,10 +8,10 @@ interface ModelSelectorProps {
   initialModel?: string;
 }
 
-const ModelSelector = ({ 
-  options = MODEL_OPTIONS, 
-  onChange, 
-  initialModel 
+const ModelSelector = ({
+  options = MODEL_OPTIONS,
+  onChange,
+  initialModel
 }: ModelSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
@@ -52,7 +52,7 @@ const ModelSelector = ({
     if (!isOpen && dropdownRef.current) {
       const rect = dropdownRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
-      
+
       if (rect.right + 300 > viewportWidth) {
         setDropdownPosition("left");
       } else {
@@ -79,30 +79,31 @@ const ModelSelector = ({
     <div ref={dropdownRef} className="relative w-full md:w-auto">
       <div
         onClick={toggleDropdown}
-        className="flex items-center justify-end gap-2 cursor-pointer bg-transparent hover:bg-accent hover:text-accent-foreground
-rounded-lg p-2 transition-colors"
+        className="flex items-center justify-end gap-1 cursor-pointer bg-black/10 hover:bg-black/20 text-gray-400 hover:text-gray-300 rounded-full p-1.5 transition-colors border border-gray-800 hover:border-orange-500/30"
+        style={{ backdropFilter: 'blur(3px)' }}
       >
-        <span className="text-black dark:text-white text-right">{selectedModel}</span>
+        <span className="text-gray-400 text-right text-xs">{selectedModel}</span>
         <ChevronDown
-          className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""} text-black dark:text-white`}
+          className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""} text-gray-400`}
         />
       </div>
 
       {isOpen && (
-        <ul 
-          className={`absolute z-50 mt-2 ${dropdownPosition === "left" ? "right-0" : "left-0"} w-full md:w-[300px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-[50vh] overflow-y-auto`}
+        <ul
+          className={`absolute z-50 mt-2 ${dropdownPosition === "left" ? "right-0" : "left-0"} w-full md:w-[300px] bg-black/90 border border-gray-700 rounded-lg shadow-lg max-h-[50vh] overflow-y-auto`}
+          style={{ backdropFilter: 'blur(10px)' }}
         >
           {options.map((option) => (
             <li
               key={option}
               onClick={() => handleSelect(option)}
-              className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-accent hover:text-accent-foreground
+              className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-black/50 hover:border-l-2 hover:border-orange-500
  transition-colors gap-4 ${
-                selectedModel === option ? "bg-transparent text-blue-600 dark:text-blue-400" : "text-black dark:text-white"
+                selectedModel === option ? "bg-black/40 border-l-2 border-orange-500 text-orange-300" : "text-white border-l-2 border-transparent"
               }`}
             >
-              <span>{option}</span>
-              {selectedModel === option && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+              <span className="text-sm">{option}</span>
+              {selectedModel === option && <Check className="w-4 h-4 text-orange-400" />}
             </li>
           ))}
         </ul>
