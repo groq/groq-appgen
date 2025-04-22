@@ -50,7 +50,7 @@ export default function RootLayout({
 
 					<footer className="fixed bottom-0 left-0 w-fit text-left text-sm py-1 px-4 bg-[hsl(var(--background))] border-t border-l border-r border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] z-10 rounded-tr-sm">
 						<a href="https://groq.com/terms-of-use/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[hsl(var(--foreground))] mx-2">
-							Terms of Service
+							Terms of Use
 						</a>
 						|
 						<a href="https://groq.com/wp-content/uploads/2024/05/Groq-Privacy-Policy_Final_30MAY2024.pdf" target="_blank" rel="noopener noreferrer" className="underline hover:text-[hsl(var(--foreground))] mx-2">
