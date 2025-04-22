@@ -4,9 +4,8 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ROOT_URL } from "@/utils/config";
-import { ModeToggle } from "@/components/mode-toggle";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { MAINTENANCE_MODE } from "@/lib/settings";
+import { LayoutClientContent } from '@/components/layout-client-content';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,19 +35,30 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={inter.className}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-					{MAINTENANCE_MODE ? (
-						<div className="text-center text-gray-500 py-8">
-							{"We're currently undergoing maintenance. We'll be back soon!"}
-						</div>
-					) : (
-						<>
-							{children}
-							<ModeToggle />
-							<Toaster position="bottom-right" />
-						</>
-					)}
+					<LayoutClientContent>
+						{MAINTENANCE_MODE ? (
+							<div className="text-center text-gray-500 py-8">
+								{"We're currently undergoing maintenance. We'll be back soon!"}
+							</div>
+						) : (
+							<>
+								{children}
+								<Toaster position="bottom-right" />
+							</>
+						)}
+					</LayoutClientContent>
+
+					<footer className="fixed bottom-0 left-0 w-fit text-left text-sm py-1 px-4 bg-[hsl(var(--background))] border-t border-l border-r border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] z-10">
+						<a href="https://groq.com/terms-of-use/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[hsl(var(--foreground))] mx-2">
+							Terms of Service
+						</a>
+						|
+						<a href="https://groq.com/wp-content/uploads/2024/05/Groq-Privacy-Policy_Final_30MAY2024.pdf" target="_blank" rel="noopener noreferrer" className="underline hover:text-[hsl(var(--foreground))] mx-2">
+							Privacy Policy
+						</a>
+					</footer>
+
 				</ThemeProvider>
-				<GoogleAnalytics gaId="G-MGQ7E93R12" />
 			</body>
 		</html>
 	);
