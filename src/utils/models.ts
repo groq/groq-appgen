@@ -18,6 +18,12 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         type: "vision",
         maxTokens: 8192
     },
+    "qwen/qwen3-32b": {
+        name: "qwen/qwen3-32b",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 32768
+    },
     "qwen-2.5-coder-32b": {
         name: "qwen-2.5-coder-32b",
         temperature: 0.1,
