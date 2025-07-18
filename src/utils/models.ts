@@ -24,6 +24,12 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
         type: "text",
         maxTokens: 32768
     },
+    "moonshotai/kimi-k2-instruct": {
+        name: "moonshotai/kimi-k2-instruct",
+        temperature: 0.6,
+        type: "text",
+        maxTokens: 131072
+    },
     "qwen-2.5-coder-32b": {
         name: "qwen-2.5-coder-32b",
         temperature: 0.1,
