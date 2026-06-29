@@ -23,7 +23,6 @@ export function ReportButton({ sessionId, version }: ReportButtonProps) {
 				body: JSON.stringify({
 					sessionId,
 					appUrl: `${window.location.origin}/apps/${sessionId}/${version}`,
-					rootUrl: window.location.origin,
 					version,
 				}),
 			});

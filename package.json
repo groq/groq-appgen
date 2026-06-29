@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:h1-3831804": "node scripts/security-regression-h1-3831804.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^15.1.2",

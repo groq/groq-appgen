@@ -3,8 +3,13 @@ import { getFromStorageWithRegex, getStorageKey } from "@/server/storage";
 import { ROOT_URL } from "@/utils/config";
 
 export async function POST(request: NextRequest) {
-    const { sessionId, version, rootUrl = ROOT_URL, appUrl } = await request.json();
     try {
+        const { sessionId, version, appUrl } = await request.json() as {
+            sessionId: string;
+            version: string;
+            appUrl?: string;
+        };
+
         // Get the app data to find the creator's IP
         const key = getStorageKey(sessionId, version);
         const { value: appDataStr } = await getFromStorageWithRegex(key);
@@ -26,9 +31,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Generate the ban URL
-        const banUrl = `${rootUrl}/block?ip=${encodeURIComponent(creatorIP)}&token=${encodeURIComponent(process.env.BLOCK_SECRET || "")}`;
-
         // Send to Slack
         const slackWebhookUrl = process.env.SLACK_WEBHOOK;
         if (slackWebhookUrl) {
@@ -37,13 +39,14 @@ export async function POST(request: NextRequest) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  ban_url: banUrl,
+                  report_url: `${ROOT_URL}/block`,
+                  creator_ip: creatorIP,
                   app_url: appUrl
                 }),
             });
         }
 
-        return NextResponse.json({ success: true, banUrl });
+        return NextResponse.json({ success: true });
     } catch (error) {
         console.error("Error processing report:", error);
         return NextResponse.json(
