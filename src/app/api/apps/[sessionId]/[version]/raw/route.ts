@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFromStorageWithRegex, getStorageKey } from "@/server/storage";
+import { renderSandboxedHtml } from "@/server/sandboxed-html";
 
 export async function GET(
 	request: NextRequest,
@@ -16,11 +17,7 @@ export async function GET(
 		}
 
 		const data = JSON.parse(value);
-		return new NextResponse(data.html, {
-			headers: {
-				"Content-Type": "text/html",
-			},
-		});
+		return renderSandboxedHtml(data.html);
 	} catch (error) {
 		console.error("Error retrieving raw app:", error);
 		return NextResponse.json(

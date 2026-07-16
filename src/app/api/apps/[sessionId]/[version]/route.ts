@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFromStorageWithRegex, saveToStorage, getStorageKey, addToGallery, isIPBlocked } from "@/server/storage";
+import { renderSandboxedHtml } from "@/server/sandboxed-html";
 import { verifyHtml } from "@/server/signing";
 
 export async function GET(
@@ -19,11 +20,7 @@ export async function GET(
 
 		const data = JSON.parse(value);
 		if (raw) {
-			return new NextResponse(data.html, {
-				headers: {
-					"Content-Type": "text/html",
-				},
-			});
+			return renderSandboxedHtml(data.html);
 		}
 		return NextResponse.json(data);
 	} catch (error) {
