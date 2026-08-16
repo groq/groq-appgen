@@ -78,6 +78,8 @@ export default function SharedApp({
 					<iframe
 						title="Shared App"
 						srcDoc={html}
+						sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+						referrerPolicy="no-referrer"
 						className="w-full h-full border-0"
 						style={{ height: "100vh" }}
 					/>

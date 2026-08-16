@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:h1-3831774": "node scripts/security-regression-h1-3831774.mjs",
     "lint": "next lint"
   },
   "dependencies": {
