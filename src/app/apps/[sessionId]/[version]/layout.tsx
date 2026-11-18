@@ -5,16 +5,16 @@ import { headers } from "next/headers";
 
 interface LayoutProps {
 	children: React.ReactNode;
-	params: {
+	params: Promise<{
 		sessionId: string;
 		version: string;
-	};
+	}>;
 }
 
 export async function generateMetadata({
 	params,
 }: LayoutProps): Promise<Metadata> {
-	const { sessionId, version } = params;
+	const { sessionId, version } = await params;
 
 	try {
 		const headersList = headers();
@@ -45,6 +45,6 @@ export async function generateMetadata({
 	return {};
 }
 
-export default function Layout({ children, params }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
 	return <>{children}</>;
 }

@@ -4,9 +4,9 @@ import { verifyHtml } from "@/server/signing";
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: { sessionId: string; version: string } },
+	{ params }: { params: Promise<{ sessionId: string; version: string }> },
 ) {
-	const { sessionId, version } = params;
+	const { sessionId, version } = await params;
 	const raw = request.nextUrl.searchParams.get("raw") === "true";
 
 	try {
@@ -37,13 +37,13 @@ export async function GET(
 
 export async function POST(
 	request: NextRequest,
-	{ params }: { params: { sessionId: string; version: string } },
+	{ params }: { params: Promise<{ sessionId: string; version: string }> },
 ) {
-	const { sessionId, version } = params;
+	const { sessionId, version } = await params;
 
 	try {
 		const { html, signature, avoidGallery, ...rest } = await request.json();
-		const ip = request.headers.get("x-forwarded-for") || request.ip || "unknown";
+		const ip = request.headers.get("x-forwarded-for") || "unknown";
 
 		if (await isIPBlocked(ip)) {
 			console.warn(`Someone tried to submit from a blocked IP: ${ip}`);

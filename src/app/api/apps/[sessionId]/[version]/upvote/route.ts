@@ -3,12 +3,13 @@ import { upvoteGalleryItem, getUpvotes } from "@/server/storage";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { sessionId: string; version: string } }
+  { params }: { params: Promise<{ sessionId: string; version: string }> }
 ) {
   try {
-    const clientIp = request.headers.get("x-forwarded-for") || request.ip || "unknown";
+    const clientIp = request.headers.get("x-forwarded-for") || "unknown";
     const timestamp = new Date().toISOString();
-    const upvoteCount = await upvoteGalleryItem(params.sessionId, params.version, clientIp, timestamp);
+    const { sessionId, version } = await params;
+    const upvoteCount = await upvoteGalleryItem(sessionId, version, clientIp, timestamp);
     return NextResponse.json({ upvotes: upvoteCount });
   } catch (error) {
     return NextResponse.json(
@@ -20,10 +21,11 @@ export async function POST(
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { sessionId: string; version: string } }
+  { params }: { params: Promise<{ sessionId: string; version: string }> }
 ) {
   try {
-    const upvoteCount = await getUpvotes(params.sessionId, params.version);
+    const { sessionId, version } = await params;
+    const upvoteCount = await getUpvotes(sessionId, version);
     return NextResponse.json({ upvotes: upvoteCount });
   } catch (error) {
     return NextResponse.json(
