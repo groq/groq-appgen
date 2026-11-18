@@ -3,9 +3,9 @@ import { getFromStorageWithRegex, getStorageKey } from "@/server/storage";
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: { sessionId: string; version: string } }
+	{ params }: { params: Promise<{ sessionId: string; version: string }> }
 ) {
-	const { sessionId, version } = params;
+	const { sessionId, version } = await params;
 
 	try {
 		const key = getStorageKey(sessionId, version);

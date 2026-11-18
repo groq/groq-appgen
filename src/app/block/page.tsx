@@ -7,14 +7,15 @@ import { ROOT_URL } from "@/utils/config";
 export default function BlockPage({
   searchParams,
 }: {
-  searchParams: { ip: string; token: string };
+  searchParams: Promise<{ ip: string; token: string }>;
 }) {
   const handleBlock = async () => {
     try {
+      const { ip, token } = await searchParams;
       const response = await fetch(
         `${ROOT_URL}/api/block?ip=${encodeURIComponent(
-          searchParams.ip
-        )}&token=${encodeURIComponent(searchParams.token)}`,
+          ip
+        )}&token=${encodeURIComponent(token)}`,
         {
           method: "GET",
         }

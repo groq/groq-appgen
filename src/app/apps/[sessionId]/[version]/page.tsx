@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { RemixButton } from "@/components/RemixButton";
 import { Button } from "@/components/ui/button";
 import { ReportButton } from "@/app/components/report-button";
@@ -20,11 +21,8 @@ interface AppData {
 	avoidGallery?: boolean;
 }
 
-export default function SharedApp({
-	params,
-}: {
-	params: { sessionId: string; version: string };
-}) {
+export default function SharedApp() {
+	const params = useParams<{ sessionId: string; version: string }>();
 	const [html, setHtml] = useState("");
 	const [showWarning, setShowWarning] = useState(true);
 	const [isInGallery, setIsInGallery] = useState<boolean>(true);
