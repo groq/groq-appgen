@@ -3,10 +3,10 @@ import { removeGalleryItem } from "@/server/storage";
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { sessionId: string; version: string } }
+    { params }: { params: Promise<{ sessionId: string; version: string }> }
 ) {
-    const { sessionId, version } = params;
-    const ip = request.headers.get("x-forwarded-for") || request.ip || "unknown";
+    const { sessionId, version } = await params;
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
 
     try {
         const removed = await removeGalleryItem(sessionId, version, ip);
